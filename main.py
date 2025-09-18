@@ -230,11 +230,15 @@ async def chat_interface():
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>EPCL VEHS Safety Data Assistant</title>
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
         <style>
             * { margin: 0; padding: 0; box-sizing: border-box; }
             body { 
-                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
-                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial; 
+                background: #f8fafc;
                 min-height: 100vh;
                 display: flex;
                 justify-content: center;
@@ -243,37 +247,39 @@ async def chat_interface():
             .container { 
                 max-width: 1200px; 
                 width: 90%; 
-                background: white; 
+                background: #ffffff; 
+                border: 1px solid #e5e7eb;
                 border-radius: 15px; 
                 box-shadow: 0 20px 40px rgba(0,0,0,0.1);
                 overflow: hidden;
             }
             .header { 
-                background: linear-gradient(135deg, #2c3e50, #3498db); 
-                color: white; 
-                padding: 20px; 
-                text-align: center; 
+                background: #ffffff; 
+                color: #0f172a; 
+                padding: 16px 20px; 
+                text-align: left; 
+                border-bottom: 1px solid #e5e7eb;
             }
-            .header h1 { font-size: 2em; margin-bottom: 10px; }
-            .header p { opacity: 0.9; }
+            .header h1 { font-size: 1.25em; margin-bottom: 6px; font-weight: 600; letter-spacing: -0.01em; }
+            .header p { opacity: 0.8; font-size: 0.9em; }
             .chat-container { 
                 display: flex; 
                 height: 600px; 
             }
             .sidebar { 
                 width: 300px; 
-                background: #f8f9fa; 
+                background: #ffffff; 
                 border-right: 1px solid #e9ecef; 
                 padding: 20px;
                 overflow-y: auto;
             }
             .sidebar h3 { 
-                color: #2c3e50; 
+                color: #0f172a; 
                 margin-bottom: 15px; 
                 font-size: 1.1em;
-            }
+                }
             .suggestion { 
-                background: white; 
+                background: #ffffff; 
                 border: 1px solid #e9ecef; 
                 border-radius: 8px; 
                 padding: 10px; 
@@ -283,8 +289,8 @@ async def chat_interface():
                 font-size: 0.9em;
             }
             .suggestion:hover { 
-                background: #e3f2fd; 
-                border-color: #2196f3; 
+                background: #f0fdf4; 
+                border-color: #22c55e; 
             }
             .chat-area { 
                 flex: 1; 
@@ -295,7 +301,7 @@ async def chat_interface():
                 flex: 1; 
                 padding: 20px; 
                 overflow-y: auto; 
-                background: #fafafa;
+                background: #f8fafc;
             }
             .message { 
                 margin-bottom: 20px; 
@@ -304,13 +310,14 @@ async def chat_interface():
                 max-width: 80%;
             }
             .user-message { 
-                background: #e3f2fd; 
+                background: #ecfdf5; 
                 margin-left: auto; 
                 text-align: right;
             }
             .bot-message { 
-                background: white; 
-                border: 1px solid #e9ecef;
+                background: transparent; 
+                border: none;
+                padding: 0;
             }
             .input-area { 
                 padding: 20px; 
@@ -331,21 +338,21 @@ async def chat_interface():
                 transition: border-color 0.3s;
             }
             #queryInput:focus { 
-                border-color: #2196f3; 
+                border-color: #16a34a; 
             }
             #sendButton { 
                 padding: 12px 24px; 
-                background: linear-gradient(135deg, #2196f3, #1976d2); 
+                background: #16a34a; 
                 color: white; 
-                border: none; 
+                border: 1px solid #16a34a; 
                 border-radius: 8px; 
                 cursor: pointer; 
                 font-weight: bold;
                 transition: all 0.3s;
             }
             #sendButton:hover { 
-                transform: translateY(-2px); 
-                box-shadow: 0 5px 15px rgba(33, 150, 243, 0.3);
+                background: #15803d; 
+                border-color: #15803d;
             }
             #sendButton:disabled { 
                 background: #ccc; 
@@ -365,12 +372,13 @@ async def chat_interface():
                 border: 1px solid #ffcdd2;
             }
             .sql-code { 
-                background: #f5f5f5; 
-                border: 1px solid #ddd; 
+                background: #0b0f0e; 
+                border: 1px solid #0f172a; 
                 border-radius: 4px; 
                 padding: 10px; 
-                font-family: 'Courier New', monospace; 
-                font-size: 0.9em; 
+                color: #e2e8f0;
+                font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace; 
+                font-size: 0.88em; 
                 margin: 10px 0;
                 overflow-x: auto;
             }
@@ -390,13 +398,13 @@ async def chat_interface():
             .chain-step {
                 margin: 8px 0;
                 padding: 8px;
-                border-left: 3px solid #007bff;
+                border-left: 3px solid #16a34a;
                 background: white;
                 border-radius: 4px;
             }
             .step-type {
                 font-weight: bold;
-                color: #007bff;
+                color: #15803d;
                 text-transform: uppercase;
                 font-size: 0.8em;
             }
@@ -405,467 +413,84 @@ async def chat_interface():
                 color: #333;
             }
             .toggle-chain {
-                background: #e3f2fd;
-                border: 1px solid #2196f3;
-                border-radius: 4px;
-                padding: 5px 10px;
+                background: #f0fdf4;
+                border: 1px solid rgba(34,197,94,0.3);
+                border-radius: 6px;
+                padding: 6px 10px;
                 cursor: pointer;
                 margin: 10px 0;
                 font-size: 0.9em;
-                color: #1976d2;
+                color: #15803d;
             }
             .toggle-chain:hover {
-                background: #bbdefb;
+                background: #dcfce7;
             }
 
-            /* Response Formatter Styles */
+            /* Minimal card styling for formatted responses */
             .response-container {
                 background: #ffffff;
+                border: 1px solid #e5e7eb;
                 border-radius: 12px;
-                box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-                margin: 15px 0;
+                margin: 12px 0;
                 overflow: hidden;
             }
-
             .response-header {
-                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                color: white;
-                padding: 15px 20px;
-                border-bottom: 1px solid #e0e0e0;
-            }
-
-            .response-header h3 {
-                margin: 0;
-                font-size: 1.2em;
-                font-weight: 600;
-            }
-
-            .response-header i {
-                margin-right: 8px;
-            }
-
-            .response-content {
-                padding: 20px;
-                line-height: 1.6;
-            }
-
-            /* Department Analysis Styles */
-            .department-analysis .response-header {
-                background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
-            }
-
-            .priority-analysis {
-                padding: 20px;
-            }
-
-            .alert {
                 padding: 12px 16px;
-                border-radius: 8px;
-                margin-bottom: 15px;
-                border-left: 4px solid;
+                border-bottom: 1px solid #e5e7eb;
+                background: #ffffff;
             }
-
-            .alert-warning {
-                background-color: #fff3cd;
-                border-color: #ffc107;
-                color: #856404;
-            }
-
-            .analysis-subtitle {
-                color: #666;
-                font-style: italic;
-                margin-bottom: 20px;
-            }
-
-            .department-entry {
-                background: #f8f9fa;
-                border-radius: 8px;
-                margin: 10px 0;
-                border-left: 4px solid #ddd;
-                transition: all 0.3s ease;
-            }
-
-            .department-entry.critical {
-                border-left-color: #dc3545;
-                background: #fff5f5;
-            }
-
-            .department-entry.high {
-                border-left-color: #ffc107;
-                background: #fffbf0;
-            }
-
-            .department-entry.medium {
-                border-left-color: #28a745;
-                background: #f0fff4;
-            }
-
-            .department-entry.low {
-                border-left-color: #6c757d;
-                background: #f8f9fa;
-            }
-
-            .department-header {
-                display: flex;
-                align-items: center;
-                padding: 15px 20px;
-                background: rgba(255,255,255,0.7);
-            }
-
-            .department-number {
-                background: #007bff;
-                color: white;
-                border-radius: 50%;
-                width: 30px;
-                height: 30px;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                font-weight: bold;
-                margin-right: 15px;
-                font-size: 0.9em;
-            }
-
-            .department-name {
-                flex: 1;
+            .response-header h3 {
+                font-size: 0.95rem;
                 font-weight: 600;
-                font-size: 1.1em;
-                color: #333;
-            }
-
-            .priority-badge {
-                padding: 4px 12px;
-                border-radius: 20px;
-                font-size: 0.85em;
-                font-weight: 600;
-                text-transform: uppercase;
-            }
-
-            .priority-badge.critical {
-                background: #dc3545;
-                color: white;
-            }
-
-            .priority-badge.high {
-                background: #ffc107;
-                color: #333;
-            }
-
-            .priority-badge.medium {
-                background: #28a745;
-                color: white;
-            }
-
-            .priority-badge.low {
-                background: #6c757d;
-                color: white;
-            }
-
-            .department-details {
-                padding: 0 20px 15px 65px;
-            }
-
-            .detail-item {
-                display: flex;
-                align-items: center;
-                margin: 8px 0;
-                color: #555;
-            }
-
-            .detail-item i {
-                margin-right: 10px;
-                width: 16px;
-                color: #007bff;
-            }
-
-            .summary-section {
-                background: #e3f2fd;
-                border-radius: 8px;
-                padding: 15px;
-                margin-top: 20px;
-                border-left: 4px solid #2196f3;
-            }
-
-            .summary-section h4 {
-                margin: 0 0 10px 0;
-                color: #1976d2;
-            }
-
-            /* Category Analysis Styles */
-            .category-list {
-                padding: 20px;
-            }
-
-            .category-items {
-                list-style: none;
-                padding: 0;
-                counter-reset: category-counter;
-            }
-
-            .category-item {
-                display: flex;
-                align-items: center;
-                justify-content: space-between;
-                padding: 12px 15px;
-                margin: 8px 0;
-                background: #f8f9fa;
-                border-radius: 8px;
-                border-left: 4px solid #007bff;
-                counter-increment: category-counter;
-                position: relative;
-            }
-
-            .category-item::before {
-                content: counter(category-counter);
-                background: #007bff;
-                color: white;
-                border-radius: 50%;
-                width: 24px;
-                height: 24px;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                font-size: 0.8em;
-                font-weight: bold;
-                margin-right: 12px;
-                flex-shrink: 0;
-            }
-
-            .category-text {
-                flex: 1;
-                color: #333;
-                font-weight: 500;
-            }
-
-            .category-count {
-                background: #28a745;
-                color: white;
-                padding: 4px 8px;
-                border-radius: 12px;
-                font-size: 0.85em;
-                font-weight: 600;
-                margin-left: 10px;
-            }
-
-            /* SQL Section Styles */
-            .sql-section {
-                background: #f8f9fa;
-                border-top: 1px solid #e9ecef;
-                padding: 20px;
-            }
-
-            .sql-section h4 {
-                margin: 0 0 15px 0;
-                color: #495057;
-                font-size: 1em;
-            }
-
-            .sql-code {
-                position: relative;
-                background: #2d3748;
-                border-radius: 8px;
-                overflow: hidden;
-            }
-
-            .sql-code pre {
-                margin: 0;
-                padding: 15px;
-                overflow-x: auto;
-            }
-
-            .sql-code code {
-                color: #e2e8f0;
-                font-family: 'Fira Code', 'Consolas', monospace;
-                font-size: 0.9em;
-                line-height: 1.4;
-            }
-
-            .copy-sql-btn {
-                position: absolute;
-                top: 10px;
-                right: 10px;
-                background: rgba(255,255,255,0.1);
-                border: 1px solid rgba(255,255,255,0.2);
-                color: #e2e8f0;
-                padding: 6px 10px;
-                border-radius: 4px;
-                font-size: 0.8em;
-                cursor: pointer;
-                transition: all 0.2s ease;
-            }
-
-            .copy-sql-btn:hover {
-                background: rgba(255,255,255,0.2);
-            }
-
-            .copy-sql-btn.copied {
-                background: #28a745;
-                border-color: #28a745;
-            }
-
-            /* Recommendations Styles */
-            .recommendations-section {
-                background: #f0f8ff;
-                border-top: 1px solid #e9ecef;
-                padding: 20px;
-            }
-
-            .recommendations-section h4 {
-                margin: 0 0 15px 0;
-                color: #1976d2;
-                font-size: 1em;
-            }
-
-            .recommendation-item {
-                background: white;
-                border-radius: 8px;
-                padding: 12px 15px;
-                margin: 8px 0;
-                border-left: 4px solid #2196f3;
-                box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-            }
-
-            .rec-text {
-                color: #333;
-                line-height: 1.5;
-            }
-
-            .rec-text i {
-                margin-right: 8px;
-                color: #2196f3;
-            }
-
-            .timeline-section {
-                background: white;
-                border-radius: 8px;
-                padding: 15px;
-                margin: 15px 0;
-                border-left: 4px solid #ff9800;
-            }
-
-            .timeline-section h5 {
-                margin: 0 0 10px 0;
-                color: #f57c00;
-            }
-
-            .timeline-list {
-                list-style: none;
-                padding: 0;
+                color: #0f172a;
                 margin: 0;
             }
-
-            .timeline-item {
-                padding: 6px 0;
-                color: #555;
-                position: relative;
-                padding-left: 20px;
-            }
-
-            .timeline-item::before {
-                content: '•';
-                color: #ff9800;
-                font-weight: bold;
-                position: absolute;
-                left: 0;
-            }
-
-            /* Metadata Styles */
+            .response-header i { color: #16a34a; margin-right: 8px; }
+            .response-content { padding: 16px; color: #0f172a; line-height: 1.6; }
             .response-metadata {
-                background: #f8f9fa;
-                border-top: 1px solid #e9ecef;
-                padding: 12px 20px;
-                display: flex;
-                gap: 20px;
-                font-size: 0.85em;
-                color: #6c757d;
+                display: flex; gap: 16px; align-items: center;
+                padding: 10px 16px; border-top: 1px solid #e5e7eb; background: #f8fafc;
+                font-size: 12px; color: #6b7280;
             }
+            .response-metadata i { color: #16a34a; }
 
-            .metadata-item {
-                display: flex;
-                align-items: center;
-                gap: 6px;
-            }
+            /* Department analysis */
+            .department-analysis .response-header i { color: #16a34a; }
+            .priority-analysis { padding: 14px 16px; }
+            .alert { border-left: 3px solid #f59e0b; background: #fffbeb; color: #92400e; padding: 10px 12px; border-radius: 8px; }
+            .analysis-subtitle { color: #6b7280; margin: 10px 0 6px; font-size: 0.9rem; }
+            .department-entry { border: 1px solid #e5e7eb; border-left-width: 4px; border-radius: 10px; margin: 10px 0; background: #ffffff; }
+            .department-entry.critical { border-left-color: #dc2626; }
+            .department-entry.high { border-left-color: #f59e0b; }
+            .department-entry.medium { border-left-color: #16a34a; }
+            .department-entry.low { border-left-color: #94a3b8; }
+            .department-header { display: flex; gap: 10px; align-items: center; padding: 10px 12px; }
+            .department-number { background: #16a34a; color: white; width: 26px; height: 26px; border-radius: 50%; display:flex; align-items:center; justify-content:center; font-weight:600; font-size: 12px; }
+            .department-name { font-weight: 600; color: #0f172a; }
+            .priority-badge { border-radius: 9999px; padding: 2px 8px; font-size: 11px; font-weight: 600; }
+            .priority-badge.critical { background:#fee2e2; color:#991b1b; }
+            .priority-badge.high { background:#fef3c7; color:#92400e; }
+            .priority-badge.medium { background:#dcfce7; color:#166534; }
+            .priority-badge.low { background:#e5e7eb; color:#374151; }
+            .department-details { padding: 0 12px 10px 48px; }
+            .detail-item { display:flex; gap:8px; align-items:center; color:#374151; margin: 6px 0; font-size: 0.95rem; }
+            .detail-item i { color:#16a34a; font-size: 0.9rem; }
+            .summary-section { margin-top: 12px; border:1px solid #e5e7eb; border-radius: 10px; padding: 10px 12px; background:#f8fafc; }
+            .summary-section h4 { margin:0 0 6px 0; font-size: 0.95rem; color:#0f172a; }
 
-            .metadata-item i {
-                color: #007bff;
-            }
+            /* Findings analysis */
+            .findings-analysis .response-header i { color:#16a34a; }
+            .findings-list { padding: 12px 16px; }
+            .findings-items { list-style:none; padding:0; margin: 8px 0 0 0; }
+            .finding-item { display:flex; justify-content: space-between; align-items:center; padding: 10px 12px; border:1px solid #e5e7eb; border-radius:10px; margin:8px 0; background:#ffffff; }
+            .finding-count { background:#dcfce7; color:#166534; padding: 2px 8px; border-radius: 9999px; font-weight:600; font-size: 12px; }
 
-            /* Cost Analysis Styles */
-            .cost-analysis .response-header {
-                background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
-                color: #333;
-            }
-
-            .cost-summary {
-                background: #fff3cd;
-                border: 1px solid #ffc107;
-                border-radius: 8px;
-                padding: 15px;
-                margin: 15px 0;
-                text-align: center;
-            }
-
-            .cost-amount {
-                font-size: 2em;
-                font-weight: bold;
-                color: #856404;
-                margin: 10px 0;
-            }
-
-            .cost-details {
-                display: grid;
-                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-                gap: 15px;
-                margin: 20px 0;
-            }
-
-            .cost-detail-card {
-                background: white;
-                border-radius: 8px;
-                padding: 15px;
-                border-left: 4px solid #ffc107;
-                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            }
-
-            .cost-detail-title {
-                font-weight: 600;
-                color: #333;
-                margin-bottom: 8px;
-            }
-
-            .cost-detail-value {
-                font-size: 1.2em;
-                color: #856404;
-                font-weight: bold;
-            }
-
-            /* Responsive Design */
-            @media (max-width: 768px) {
-                .department-header {
-                    flex-direction: column;
-                    align-items: flex-start;
-                    gap: 10px;
-                }
-
-                .department-details {
-                    padding-left: 20px;
-                }
-
-                .response-metadata {
-                    flex-direction: column;
-                    gap: 8px;
-                }
-
-                .sql-code pre {
-                    font-size: 0.8em;
-                }
-
-                .cost-details {
-                    grid-template-columns: 1fr;
-                }
-            }
+            /* SQL section */
+            .sql-section { padding: 12px 16px; border-top: 1px solid #e5e7eb; background: #ffffff; }
+            .sql-section h4 { margin: 0 0 8px 0; font-size: 0.95rem; color:#0f172a; }
+            .copy-sql-btn { margin-top: 8px; background: #f0fdf4; color: #166534; border:1px solid rgba(22,163,74,0.3); border-radius:6px; padding: 6px 10px; cursor:pointer; }
+            .copy-sql-btn.copied { background:#16a34a; color:white; border-color:#16a34a; }
         </style>
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     </head>
     <body>
         <div class="container">
@@ -936,6 +561,7 @@ async def chat_interface():
             </div>
         </div>
 
+        <script src="/static/response-formatter.js"></script>
         <script>
             const API_KEY = 'epcl-demo-key-2024'; // In production, get this securely
             
@@ -1007,308 +633,58 @@ async def chat_interface():
                 messages.scrollTop = messages.scrollHeight;
             }
             
-            // Response Formatter Integration
             function addBotResponse(result) {
-                const formatter = new ResponseFormatter();
-                const formattedContent = formatter.formatResponse(result);
-                
-                // Add chain of thought if available
-                let chainContent = '';
+                // Use the modular formatter when available
+                const FormatterClass = window.ResponseFormatter;
+                let content = '';
+                if (FormatterClass) {
+                    const formatter = new FormatterClass();
+                    content = formatter.formatResponse(result);
+                } else {
+                    // Fallback minimal rendering
+                    content = `<div class="response-container"><div class="response-content">${result.response.answer}</div></div>`;
+                }
+
+                // Append chain of thought (toggle)
                 if (result.chain_of_thought && result.chain_of_thought.length > 0) {
-                    chainContent = `<div class="toggle-chain" onclick="toggleChainOfThought(this)">🧠 Show Chain of Thought (${result.chain_of_thought.length} steps)</div>`;
-                    chainContent += `<div class="chain-of-thought" style="display: none;">`;
-                    chainContent += `<strong>🔗 Reasoning Steps:</strong><br>`;
-                    
-                    result.chain_of_thought.forEach((step, index) => {
-                        chainContent += `<div class="chain-step">`;
-                        chainContent += `<div class="step-type">${step.type}</div>`;
-                        chainContent += `<div class="step-content">`;
-                        
+                    content += `<div class="toggle-chain" onclick="toggleChainOfThought(this)">🧠 Show Chain of Thought (${result.chain_of_thought.length} steps)</div>`;
+                    content += `<div class="chain-of-thought" style="display: none;">`;
+                    content += `<strong>🔗 Reasoning Steps:</strong><br>`;
+                    result.chain_of_thought.forEach((step) => {
+                        content += `<div class="chain-step">`;
+                        content += `<div class="step-type">${step.type}</div>`;
+                        content += `<div class="step-content">`;
                         switch(step.type) {
                             case 'action':
-                                chainContent += `Tool: ${step.tool}<br>Input: ${step.tool_input}`;
+                                content += `Tool: ${step.tool}<br>Input: ${step.tool_input}`;
                                 break;
                             case 'tool_start':
-                                chainContent += `Starting tool: ${step.tool_name}<br>Input: ${step.input}`;
+                                content += `Starting tool: ${step.tool_name}<br>Input: ${step.input}`;
                                 break;
                             case 'tool_end':
-                                chainContent += `Tool output: ${step.output.substring(0, 200)}${step.output.length > 200 ? '...' : ''}`;
+                                content += `Tool output: ${step.output.substring(0, 200)}${step.output.length > 200 ? '...' : ''}`;
                                 break;
                             case 'llm_start':
-                                chainContent += `LLM processing started`;
+                                content += `LLM processing started`;
                                 break;
                             case 'llm_end':
-                                chainContent += `LLM completed in ${step.duration?.toFixed(2) || 'N/A'}s`;
+                                content += `LLM completed in ${step.duration?.toFixed(2) || 'N/A'}s`;
                                 if (step.response) {
-                                    chainContent += `<br>Response: ${step.response.substring(0, 150)}${step.response.length > 150 ? '...' : ''}`;
+                                    content += `<br>Response: ${step.response.substring(0, 150)}${step.response.length > 150 ? '...' : ''}`;
                                 }
                                 break;
                             case 'finish':
-                                chainContent += `Final answer generated`;
+                                content += `Final answer generated`;
                                 break;
                             default:
-                                chainContent += JSON.stringify(step, null, 2);
+                                content += JSON.stringify(step, null, 2);
                         }
-                        
-                        chainContent += `</div></div>`;
+                        content += `</div></div>`;
                     });
-                    
-                    chainContent += `</div>`;
-                }
-                
-                // Combine formatted content with chain of thought
-                const finalContent = formattedContent + chainContent;
-                
-                addMessage(finalContent, 'bot');
-            }
-            
-            // Response Formatter Class (embedded)
-            class ResponseFormatter {
-                constructor() {
-                    this.formatters = {
-                        'department_analysis': this.formatDepartmentAnalysis.bind(this),
-                        'category_analysis': this.formatCategoryAnalysis.bind(this),
-                        'cost_analysis': this.formatCostAnalysis.bind(this),
-                        'general': this.formatGeneralResponse.bind(this)
-                    };
-                }
-
-                formatResponse(result) {
-                    const responseType = this.detectResponseType(result);
-                    const formatter = this.formatters[responseType] || this.formatters['general'];
-                    return formatter(result);
-                }
-
-                detectResponseType(result) {
-                    const answer = result.response?.answer?.toLowerCase() || '';
-                    const sql = result.executed_sql?.[0]?.toLowerCase() || '';
-
-                    if (answer.includes('departments requiring') || answer.includes('incident analysis by department') || sql.includes('department')) {
-                        return 'department_analysis';
-                    }
-                    if (answer.includes('incidents by category') || answer.includes('top 5 incident categories') || sql.includes('category')) {
-                        return 'category_analysis';
-                    }
-                    if (answer.includes('cost') || answer.includes('expensive') || sql.includes('total_cost')) {
-                        return 'cost_analysis';
-                    }
-                    return 'general';
-                }
-
-                formatDepartmentAnalysis(result) {
-                    let content = `<div class="response-container department-analysis">`;
-                    content += `<div class="response-header">
-                        <h3><i class="fas fa-building"></i> Department Safety Analysis</h3>
-                    </div>`;
-                    content += `<div class="response-content">${this.formatText(result.response.answer)}</div>`;
-                    content += this.formatSQLSection(result.executed_sql);
-                    content += this.formatRecommendations(result.response.recommendations);
-                    content += this.formatMetadata(result);
                     content += `</div>`;
-                    return content;
                 }
 
-                formatCategoryAnalysis(result) {
-                    let content = `<div class="response-container category-analysis">`;
-                    content += `<div class="response-header">
-                        <h3><i class="fas fa-tags"></i> Top Incident Categories</h3>
-                    </div>`;
-                    
-                    // Parse category data from response
-                    const answer = result.response.answer;
-                    if (answer.includes('[(None,') || answer.includes('partial results')) {
-                        // Handle the specific case with category data
-                        content += this.formatCategoryData(answer);
-                    } else {
-                        content += `<div class="response-content">${this.formatText(answer)}</div>`;
-                    }
-                    
-                    content += this.formatSQLSection(result.executed_sql);
-                    content += this.formatRecommendations(result.response.recommendations);
-                    content += this.formatMetadata(result);
-                    content += `</div>`;
-                    return content;
-                }
-
-                formatCategoryData(answer) {
-                    let content = `<div class="category-list">`;
-                    content += `<h4>Top 5 Incident Categories by Frequency</h4>`;
-                    
-                    // Extract data from the answer
-                    if (answer.includes('[(None, 1730), (\'Incident\', 866)]')) {
-                        content += `<div class="category-items">`;
-                        content += `<div class="category-item">
-                            <div class="category-text">Unspecified Category</div>
-                            <div class="category-count">1,730</div>
-                        </div>`;
-                        content += `<div class="category-item">
-                            <div class="category-text">General Incident</div>
-                            <div class="category-count">866</div>
-                        </div>`;
-                        content += `</div>`;
-                        
-                        content += `<div class="alert alert-warning">
-                            <i class="fas fa-exclamation-triangle"></i>
-                            <strong>Data Quality Note:</strong> A large number of incidents (1,730) have unspecified categories. 
-                            Consider implementing better categorization processes.
-                        </div>`;
-                    } else {
-                        content += `<div class="response-content">${this.formatText(answer)}</div>`;
-                    }
-                    
-                    content += `</div>`;
-                    return content;
-                }
-
-                formatCostAnalysis(result) {
-                    let content = `<div class="response-container cost-analysis">`;
-                    content += `<div class="response-header">
-                        <h3><i class="fas fa-dollar-sign"></i> Cost Analysis</h3>
-                    </div>`;
-                    
-                    const answer = result.response.answer;
-                    if (answer.includes('Result: None') || answer === 'None') {
-                        content += `<div class="cost-summary">
-                            <div class="cost-amount">No Cost Data Available</div>
-                            <p>The system could not retrieve cost information for the specified period. This may be due to:</p>
-                            <ul>
-                                <li>Missing cost data in the database</li>
-                                <li>No incidents recorded for this year with cost information</li>
-                                <li>Data quality issues with the total_cost field</li>
-                            </ul>
-                        </div>`;
-                    } else {
-                        content += `<div class="response-content">${this.formatText(answer)}</div>`;
-                    }
-                    
-                    content += this.formatSQLSection(result.executed_sql);
-                    content += this.formatRecommendations(result.response.recommendations);
-                    content += this.formatMetadata(result);
-                    content += `</div>`;
-                    return content;
-                }
-
-                formatGeneralResponse(result) {
-                    let content = `<div class="response-container general-response">`;
-                    content += `<div class="response-header">
-                        <h3><i class="fas fa-robot"></i> Assistant Response</h3>
-                    </div>`;
-                    content += `<div class="response-content">${this.formatText(result.response.answer)}</div>`;
-                    content += this.formatSQLSection(result.executed_sql);
-                    content += this.formatRecommendations(result.response.recommendations);
-                    content += this.formatMetadata(result);
-                    content += `</div>`;
-                    return content;
-                }
-
-                formatSQLSection(sqlQueries) {
-                    if (!sqlQueries || sqlQueries.length === 0) return '';
-                    
-                    let content = `<div class="sql-section">
-                        <h4><i class="fas fa-database"></i> SQL Query</h4>`;
-                    
-                    sqlQueries.forEach(sql => {
-                        content += `<div class="sql-code">
-                            <pre><code>${this.escapeHtml(sql)}</code></pre>
-                            <button class="copy-sql-btn" onclick="copyToClipboard('${this.escapeHtml(sql).replace(/'/g, "\\'")}')"> 
-                                <i class="fas fa-copy"></i> Copy
-                            </button>
-                        </div>`;
-                    });
-                    
-                    content += `</div>`;
-                    return content;
-                }
-
-                formatRecommendations(recommendations) {
-                    if (!recommendations || recommendations.length === 0) return '';
-                    
-                    let content = `<div class="recommendations-section">
-                        <h4><i class="fas fa-lightbulb"></i> Recommendations</h4>
-                        <div class="recommendations-list">`;
-
-                    for (let rec of recommendations) {
-                        if (rec.includes('IMPLEMENTATION TIMELINE:')) {
-                            content += `<div class="timeline-section">
-                                <h5><i class="fas fa-clock"></i> Implementation Timeline</h5>
-                                <ul class="timeline-list">`;
-                        } else if (rec.startsWith('   •')) {
-                            content += `<li class="timeline-item">${rec.replace('   •', '').trim()}</li>`;
-                        } else if (rec.trim() === '') {
-                            continue;
-                        } else {
-                            content += `<div class="recommendation-item">
-                                <div class="rec-text">${this.formatRecommendationText(rec)}</div>
-                            </div>`;
-                        }
-                    }
-
-                    content += `</div></div>`;
-                    return content;
-                }
-
-                formatRecommendationText(text) {
-                    const iconMap = {
-                        '🚨': 'exclamation-triangle', '📊': 'chart-bar', '🔍': 'search',
-                        '📚': 'book', '⚡': 'bolt', '📈': 'chart-line', '🎯': 'bullseye',
-                        '💰': 'dollar-sign', '⏰': 'clock', '📅': 'calendar', '👥': 'users',
-                        '🔄': 'sync', '🏢': 'building', '🏭': 'industry', '🔧': 'wrench',
-                        '👷': 'hard-hat', '📋': 'clipboard-list'
-                    };
-
-                    for (let [emoji, icon] of Object.entries(iconMap)) {
-                        if (text.includes(emoji)) {
-                            text = text.replace(emoji, `<i class="fas fa-${icon}"></i>`);
-                            break;
-                        }
-                    }
-                    return text;
-                }
-
-                formatMetadata(result) {
-                    return `<div class="response-metadata">
-                        <div class="metadata-item">
-                            <i class="fas fa-clock"></i>
-                            <span>Execution Time: ${result.execution_time?.toFixed(2) || 'N/A'}s</span>
-                        </div>
-                        <div class="metadata-item">
-                            <i class="fas fa-calendar"></i>
-                            <span>Timestamp: ${new Date(result.timestamp).toLocaleString()}</span>
-                        </div>
-                    </div>`;
-                }
-
-                formatText(text) {
-                    if (!text) return '';
-                    return text
-                        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-                        .replace(/\*(.*?)\*/g, '<em>$1</em>')
-                        .replace(/\n/g, '<br>')
-                        .replace(/(\d+)\.\s+/g, '<br><strong>$1.</strong> ');
-                }
-
-                escapeHtml(text) {
-                    const div = document.createElement('div');
-                    div.textContent = text;
-                    return div.innerHTML;
-                }
-            }
-            
-            // Utility function for copying SQL to clipboard
-            function copyToClipboard(text) {
-                navigator.clipboard.writeText(text).then(() => {
-                    const btn = event.target.closest('.copy-sql-btn');
-                    const originalText = btn.innerHTML;
-                    btn.innerHTML = '<i class="fas fa-check"></i> Copied!';
-                    btn.classList.add('copied');
-                    
-                    setTimeout(() => {
-                        btn.innerHTML = originalText;
-                        btn.classList.remove('copied');
-                    }, 2000);
-                }).catch(err => {
-                    console.error('Failed to copy text: ', err);
-                });
+                addMessage(content, 'bot');
             }
             
             function toggleChainOfThought(element) {

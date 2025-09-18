@@ -27,8 +27,6 @@ from typing import Dict, List, Any, Optional, Tuple
 from datetime import datetime
 import sqlite3
 import ast
-import asyncio
-from functools import wraps
 
 # LangChain imports
 from langchain_community.utilities import SQLDatabase
@@ -48,54 +46,6 @@ from safe_sql_executor import SafeSQLExecutor, QueryResult, QueryRiskLevel
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
-
-
-def timeout_handler(timeout_seconds: int = 45):
-    """Cross-platform decorator to add timeout handling to agent queries."""
-    def decorator(func):
-        @wraps(func)
-        def wrapper(*args, **kwargs):
-            import threading
-            import time
-            
-            result = [None]
-            exception = [None]
-            
-            def target():
-                try:
-                    result[0] = func(*args, **kwargs)
-                except Exception as e:
-                    exception[0] = e
-            
-            thread = threading.Thread(target=target)
-            thread.daemon = True
-            thread.start()
-            thread.join(timeout_seconds)
-            
-            if thread.is_alive():
-                # Thread is still running, timeout occurred
-                logger.warning(f"Query timed out after {timeout_seconds} seconds")
-                return {
-                    "success": False,
-                    "error": f"Query execution timed out after {timeout_seconds} seconds",
-                    "execution_time": timeout_seconds,
-                    "timestamp": datetime.now().isoformat(),
-                    "chain_of_thought": []
-                }
-            
-            if exception[0]:
-                logger.error(f"Query execution failed: {exception[0]}")
-                return {
-                    "success": False,
-                    "error": f"Query execution failed: {str(exception[0])}",
-                    "execution_time": 0,
-                    "timestamp": datetime.now().isoformat(),
-                    "chain_of_thought": []
-                }
-            
-            return result[0]
-        return wrapper
-    return decorator
 
 
 class EPCLCallbackHandler(BaseCallbackHandler):
@@ -208,15 +158,12 @@ class EPCLSQLAgent:
         self.db_path = db_path
         self.safe_executor = SafeSQLExecutor(db_path, max_execution_time)
         
-        # Initialize OpenAI LLM with rate limiting
+        # Initialize LLM
         self.llm = ChatOpenAI(
             model=model_name,
             temperature=temperature,
             openai_api_key=openai_api_key,
-            max_tokens=2000,
-            request_timeout=30,  # 30 second timeout per request
-            max_retries=3,  # Retry failed requests
-            streaming=False  # Disable streaming for more reliable execution
+            max_tokens=2000
         )
         
         # Initialize database connection for LangChain
@@ -269,9 +216,9 @@ class EPCLSQLAgent:
             verbose=True,
             agent_type=AgentType.ZERO_SHOT_REACT_DESCRIPTION,
             handle_parsing_errors=True,
-            max_iterations=8,  # Increased to 8 for complex queries
-            max_execution_time=60,  # Increased to 60 seconds
-            early_stopping_method="force"  # Use 'force' instead of deprecated 'generate'
+            max_iterations=5,  # Increased from 3 to 5
+            max_execution_time=45  # Increased from 30 to 45 seconds
+            # early_stopping_method parameter removed as it's deprecated
         )
     
     def _load_domain_context(self) -> Dict[str, Any]:
@@ -295,7 +242,6 @@ class EPCLSQLAgent:
         }
         return context
     
-    @timeout_handler(timeout_seconds=50)
     def query(self, user_input: str, include_explanation: bool = True) -> Dict[str, Any]:
         """
         Process a natural language query and return results with analysis.
@@ -347,24 +293,12 @@ class EPCLSQLAgent:
                 # Capture any partial chain of thought
                 self.last_chain_of_thought = self.callback_handler.get_chain_of_thought()
                 
-                # Try to extract any partial results from chain of thought for ANY agent error
-                # This specifically handles output parsing errors and similar failures
-                partial_result = self._extract_partial_result_from_chain()
-                if partial_result:
-                    logger.info("Extracted partial result from chain of thought after agent error")
-                    return partial_result
-                
-                # Additionally, check if agent stopped due to iteration/time limits and try again
-                if (
-                    "iteration limit" in error_msg.lower()
-                    or "time limit" in error_msg.lower()
-                    or "stopped due to" in error_msg.lower()
-                    or "parsing error" in error_msg.lower()
-                    or "output parsing" in error_msg.lower()
-                ):
+                # Check if agent stopped due to iteration/time limits
+                if "iteration limit" in error_msg.lower() or "time limit" in error_msg.lower() or "stopped due to" in error_msg.lower():
+                    # Try to extract any partial results from chain of thought
                     partial_result = self._extract_partial_result_from_chain()
                     if partial_result:
-                        logger.info("Extracted partial result from chain of thought (limit/parsing)")
+                        logger.info("Extracted partial result from chain of thought")
                         return partial_result
                 
                 # Fallback to direct SQL execution

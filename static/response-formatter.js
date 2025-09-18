@@ -28,7 +28,9 @@ class ResponseFormatter {
      */
     detectResponseType(result) {
         const answer = result.response?.answer?.toLowerCase() || '';
-        const sql = result.executed_sql?.[0]?.toLowerCase() || '';
+        const sqlArray = (result.executed_sql && Array.isArray(result.executed_sql) ? result.executed_sql : [])
+            .concat(result.response?.sql_queries || []);
+        const sql = (sqlArray[0] || '').toLowerCase();
 
         if (answer.includes('departments requiring') || answer.includes('incident analysis by department') || sql.includes('department')) {
             return 'department_analysis';
@@ -91,8 +93,7 @@ class ResponseFormatter {
         let content = `<div class="priority-analysis">`;
         
         const lines = answer.split('\n');
-        let inDepartmentList = false;
-        let inSummary = false;
+        let entryOpen = false;
 
         for (let line of lines) {
             line = line.trim();
@@ -102,14 +103,23 @@ class ResponseFormatter {
                 content += `<div class="alert alert-warning">
                     <i class="fas fa-exclamation-triangle"></i> ${line.replace(/🚨\s*\*\*|\*\*/g, '')}
                 </div>`;
-                inDepartmentList = true;
             } else if (line.includes('Based on open incidents')) {
                 content += `<p class="analysis-subtitle">${line}</p>`;
             } else if (line.match(/^\d+\.\s+\*\*.*\*\*/)) {
-                // Department entry
+                // New department entry: close previous one if open
+                if (entryOpen) {
+                    content += `</div></div>`; // close .department-details and .department-entry
+                    entryOpen = false;
+                }
+                // Start new entry
                 content += this.formatDepartmentEntry(line);
+                entryOpen = true;
             } else if (line.includes('📈 **SUMMARY**')) {
-                inSummary = true;
+                // Close any open entry before summary
+                if (entryOpen) {
+                    content += `</div></div>`;
+                    entryOpen = false;
+                }
                 content += `<div class="summary-section">
                     <h4><i class="fas fa-chart-line"></i> Summary</h4>
                     <p>${line.replace(/📈\s*\*\*SUMMARY\*\*:\s*/, '')}</p>
@@ -118,6 +128,11 @@ class ResponseFormatter {
                 // Department details
                 content += this.formatDepartmentDetail(line);
             }
+        }
+
+        // Close any remaining open entry
+        if (entryOpen) {
+            content += `</div></div>`;
         }
 
         content += `</div>`;
@@ -156,7 +171,7 @@ class ResponseFormatter {
 
         for (let [emoji, icon] of Object.entries(iconMap)) {
             if (line.includes(emoji)) {
-                const text = line.replace(/\s*📊|🚨|✅|💰\s*/, '').trim();
+                const text = line.replace(/[📊🚨✅💰]\s*/g, '').trim();
                 return `<div class="detail-item">
                     <i class="fas fa-${icon}"></i>
                     <span>${text}</span>
@@ -164,7 +179,7 @@ class ResponseFormatter {
             }
         }
         
-        return `<div class="detail-item">${line.trim()}</div></div>`;
+        return `<div class="detail-item">${line.trim()}</div>`;
     }
 
     /**
@@ -311,7 +326,7 @@ class ResponseFormatter {
         sqlQueries.forEach(sql => {
             content += `<div class="sql-code">
                 <pre><code>${this.escapeHtml(sql)}</code></pre>
-                <button class="copy-sql-btn" onclick="copyToClipboard('${this.escapeHtml(sql).replace(/'/g, "\\'")}')">
+                <button class="copy-sql-btn" onclick="copyToClipboard(this, '${this.escapeHtml(sql).replace(/'/g, "\\'")}')">
                     <i class="fas fa-copy"></i> Copy
                 </button>
             </div>`;
@@ -442,10 +457,10 @@ class ResponseFormatter {
 }
 
 // Utility function for copying SQL to clipboard
-function copyToClipboard(text) {
+function copyToClipboard(el, text) {
     navigator.clipboard.writeText(text).then(() => {
         // Show temporary success message
-        const btn = event.target.closest('.copy-sql-btn');
+        const btn = el.closest('.copy-sql-btn') || el;
         const originalText = btn.innerHTML;
         btn.innerHTML = '<i class="fas fa-check"></i> Copied!';
         btn.classList.add('copied');
