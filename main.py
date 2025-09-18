@@ -500,44 +500,7 @@ async def chat_interface():
             </div>
             
             <div class="chat-container">
-                <div class="sidebar">
-                    <h3>💡 Suggested Queries</h3>
-                    <div class="suggestion" onclick="setQuery('How many incidents occurred in the last 6 months?')">
-                        How many incidents occurred in the last 6 months?
-                    </div>
-                    <div class="suggestion" onclick="setQuery('What are the top 5 incident categories by frequency?')">
-                        What are the top 5 incident categories by frequency?
-                    </div>
-                    <div class="suggestion" onclick="setQuery('Which locations have the highest incident counts?')">
-                        Which locations have the highest incident counts?
-                    </div>
-                    <div class="suggestion" onclick="setQuery('Show incidents with High injury potential')">
-                        Show incidents with High injury potential
-                    </div>
-                    <div class="suggestion" onclick="setQuery('Which departments need the most attention?')">
-                        Which departments need the most attention?
-                    </div>
-                    <div class="suggestion" onclick="setQuery('How many hazards were reported in the last 6 months?')">
-                        How many hazards were reported in the last 6 months?
-                    </div>
-                    <div class="suggestion" onclick="setQuery('What are the top 5 hazard categories by frequency?')">
-                        What are the top 5 hazard categories by frequency?
-                    </div>
-                    <div class="suggestion" onclick="setQuery('Which departments reported the most hazards?')">
-                        Which departments reported the most hazards?
-                    </div>
-                    <div class="suggestion" onclick="setQuery('Show recent hazards from the last 30 days')">
-                        Show recent hazards from the last 30 days
-                    </div>
-                    <div class="suggestion" onclick="setQuery('How many open incidents are there?')">
-                        How many open incidents are there?
-                    </div>
-                    
-                    <h3 style="margin-top: 30px;">📊 Quick Stats</h3>
-                    <div id="quickStats" style="font-size: 0.9em; color: #666;">
-                        Loading statistics...
-                    </div>
-                </div>
+                
                 
                 <div class="chat-area">
                     <div class="messages" id="messages">

@@ -692,12 +692,32 @@ class EPCLSQLAgent:
         # Handle simple count queries
         if "COUNT(*)" in sql_query.upper() and len(data) == 1 and len(data[0]) == 1:
             count_value = list(data[0].values())[0]
-            if "open" in sql_query.lower():
+            sql_lower = sql_query.lower()
+            # Status-based counts
+            if " open" in sql_lower:
                 return f"There are {count_value} open incidents."
-            elif "closed" in sql_query.lower():
+            if " closed" in sql_lower:
                 return f"There are {count_value} closed incidents."
-            else:
-                return f"There are {count_value} total incidents in the database."
+            # Time-window counts
+            if "date_of_occurrence" in sql_lower:
+                # Last month window: >= start of this month - 1 month AND < start of this month
+                if "start of month', '-1 month" in sql_lower and "< date('now', 'start of month')" in sql_lower:
+                    return f"{count_value} incidents happened last month."
+                # Current month
+                if ">= date('now', 'start of month')" in sql_lower:
+                    return f"{count_value} incidents happened this month."
+                # Last 30 days (various patterns)
+                if "last 30 days" in sql_lower or "-30 day" in sql_lower:
+                    return f"{count_value} incidents happened in the last 30 days."
+                # Last 6 months
+                if "last 6 months" in sql_lower or "-6 month" in sql_lower:
+                    return f"{count_value} incidents happened in the last 6 months."
+                # This year
+                if "strftime('%y'" in sql_lower or "strftime('%Y'" in sql_lower:
+                    if ", 'now')" in sql_lower and "date_of_occurrence" in sql_lower:
+                        return f"{count_value} incidents happened this year."
+            # Default fallback
+            return f"There are {count_value} total incidents in the database."
         
         # Handle status breakdown
         if "status" in sql_query.lower() and "GROUP BY" in sql_query.upper():
