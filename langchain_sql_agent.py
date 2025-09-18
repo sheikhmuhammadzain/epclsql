@@ -339,22 +339,23 @@ class EPCLSQLAgent:
                     # Else pick the first
                     preferred_query = preferred_query or executed_queries[0]
                     # Execute preferred query
-                    exec_result = self.safe_executor.execute_query(preferred_query)
+                    normalized_query = self._normalize_simple_group_count_query(preferred_query)
+                    exec_result = self.safe_executor.execute_query(normalized_query)
                     if exec_result.success:
-                        concrete_answer = self._format_sql_result_as_text(exec_result.data or [], preferred_query)
-                        recs = self._generate_context_recommendations(preferred_query, exec_result.data or [])
+                        concrete_answer = self._format_sql_result_as_text(exec_result.data or [], normalized_query)
+                        recs = self._generate_context_recommendations(normalized_query, exec_result.data or [])
                         execution_time = (datetime.now() - start_time).total_seconds()
                         return {
                             "success": True,
                             "response": {
                                 "answer": concrete_answer,
-                                "sql_queries": [preferred_query],
+                                "sql_queries": [normalized_query],
                                 "explanation": "Answer derived from executed SQL extracted from the agent run.",
                                 "recommendations": recs
                             },
                             "original_query": user_input,
                             "processed_query": processed_input,
-                            "executed_sql": [preferred_query],
+                            "executed_sql": [normalized_query],
                             "execution_time": execution_time,
                             "timestamp": start_time.isoformat(),
                             "chain_of_thought": self.last_chain_of_thought
@@ -460,12 +461,25 @@ class EPCLSQLAgent:
                 "common inspection findings": "SELECT finding, COUNT(*) as count FROM inspection_findings WHERE finding IS NOT NULL AND TRIM(finding) != '' GROUP BY finding ORDER BY count DESC LIMIT 10",
                 "most common findings": "SELECT 'audit' as source, finding, COUNT(*) as count FROM audit_findings WHERE finding IS NOT NULL AND TRIM(finding) != '' GROUP BY finding UNION ALL SELECT 'inspection' as source, finding, COUNT(*) as count FROM inspection_findings WHERE finding IS NOT NULL AND TRIM(finding) != '' GROUP BY finding ORDER BY count DESC LIMIT 10",
                 
+                # Hazard analysis
+                "how many hazards": "SELECT COUNT(*) as total_hazards FROM hazard_id",
+                "total hazards": "SELECT COUNT(*) as total_hazards FROM hazard_id",
+                "hazards last": "SELECT COUNT(*) as total_hazards FROM hazard_id WHERE date_of_occurrence > 'last 6 months'",
+                "hazards in the last": "SELECT COUNT(*) as total_hazards FROM hazard_id WHERE date_of_occurrence > 'last 6 months'",
+                "hazards were reported in the last": "SELECT COUNT(*) as total_hazards FROM hazard_id WHERE date_of_occurrence > 'last 6 months'",
+                "top hazard categories": "SELECT category, COUNT(*) as count FROM hazard_id WHERE category IS NOT NULL GROUP BY category ORDER BY count DESC LIMIT 5",
+                "hazard categories": "SELECT category, COUNT(*) as count FROM hazard_id WHERE category IS NOT NULL GROUP BY category ORDER BY count DESC LIMIT 5",
+                "departments reported the most hazards": "SELECT department, COUNT(*) as count FROM hazard_id WHERE department IS NOT NULL AND department != '' GROUP BY department ORDER BY count DESC LIMIT 10",
+                "recent hazards": "SELECT incident_number, date_of_occurrence, location, department, category FROM hazard_id WHERE date_of_occurrence >= 'last 30 days' ORDER BY date_of_occurrence DESC LIMIT 20",
+                
                 # Location analysis
                 "locations need attention": "SELECT location, COUNT(*) as incident_count, COUNT(CASE WHEN status = 'Open' THEN 1 END) as open_incidents FROM incident WHERE location IS NOT NULL GROUP BY location ORDER BY incident_count DESC LIMIT 10",
                 "which locations": "SELECT location, COUNT(*) as incident_count FROM incident WHERE location IS NOT NULL GROUP BY location ORDER BY incident_count DESC LIMIT 10",
+                "highest incident counts": "SELECT location, COUNT(*) as incident_count FROM incident WHERE location IS NOT NULL GROUP BY location ORDER BY incident_count DESC LIMIT 10",
                 
                 # Category analysis
                 "incidents by category": "SELECT category, COUNT(*) as count FROM incident WHERE category IS NOT NULL GROUP BY category ORDER BY count DESC LIMIT 10",
+                "top 5 incident categories": "SELECT category, COUNT(*) as count FROM incident WHERE category IS NOT NULL GROUP BY category ORDER BY count DESC LIMIT 5",
                 "categories": "SELECT category, COUNT(*) as count FROM incident WHERE category IS NOT NULL GROUP BY category ORDER BY count DESC LIMIT 10",
                 
                 # Cost analysis
@@ -477,6 +491,9 @@ class EPCLSQLAgent:
                 "open incidents": "SELECT COUNT(*) as open_incidents FROM incident WHERE status = 'Open'",
                 "closed incidents": "SELECT COUNT(*) as closed_incidents FROM incident WHERE status = 'Closed'",
                 "incident status": "SELECT status, COUNT(*) as count FROM incident WHERE status IS NOT NULL GROUP BY status ORDER BY count DESC",
+                "incidents last 6 months": "SELECT COUNT(*) as total_incidents FROM incident WHERE date_of_occurrence > 'last 6 months'",
+                "incidents in the last": "SELECT COUNT(*) as total_incidents FROM incident WHERE date_of_occurrence > 'last 6 months'",
+                "high injury potential": "SELECT incident_number, date_of_occurrence, location, department, category FROM incident WHERE injury_potential = 'High' ORDER BY date_of_occurrence DESC LIMIT 20",
                 
                 # Time analysis
                 "recent incidents": "SELECT incident_number, date_of_occurrence, incident_type, location, department FROM incident WHERE date_of_occurrence IS NOT NULL ORDER BY date_of_occurrence DESC LIMIT 10",
@@ -615,11 +632,32 @@ class EPCLSQLAgent:
         
         # Handle category analysis
         if "category" in sql_query.lower() and "GROUP BY" in sql_query.upper():
-            result_text = "Incidents by category:\n\n"
-            for i, row in enumerate(data[:10], 1):
-                category = row.get('category', 'Unknown')
-                count = row.get('count', 0)
-                result_text += f"{i}. {category}: {count} incidents\n"
+            is_hazard = "hazard_id" in sql_query.lower()
+            title = "Hazards by category" if is_hazard else "Incidents by category"
+            unit = "hazards" if is_hazard else "incidents"
+            result_text = f"{title}:\n\n"
+            idx = 1
+            for row in data:
+                category = row.get('category')
+                # Skip null/blank/placeholder categories
+                if category is None:
+                    continue
+                cat_str = str(category).strip()
+                if not cat_str or cat_str.lower() in {"none", "null", "n/a", "na"}:
+                    continue
+                # Accept common count aliases
+                count = (
+                    row.get('count') or row.get('COUNT') or row.get('frequency') or row.get('FREQUENCY') or
+                    row.get('freq') or row.get('cnt') or row.get('incident_count') or 0
+                )
+                try:
+                    count = int(float(count))
+                except Exception:
+                    pass
+                result_text += f"{idx}. {cat_str}: {count} {unit}\n"
+                idx += 1
+                if idx > 10:
+                    break
             return result_text.strip()
 
         # Handle findings analysis (audit/inspection)
@@ -888,6 +926,34 @@ class EPCLSQLAgent:
         lines = [ln.strip() for ln in s.splitlines()]
         s = " ".join([ln for ln in lines if ln])
         return s.strip()
+
+    def _normalize_simple_group_count_query(self, sql: str) -> str:
+        """For queries like 'SELECT col, COUNT(*) ... FROM incident ... GROUP BY col',
+        ensure NULL/blank values are excluded by adding a WHERE clause if missing.
+        Applies to common keys: location, department, category.
+        """
+        try:
+            lower = sql.lower()
+            if " from incident" in lower and "group by" in lower and "count(" in lower:
+                # Identify grouping column heuristically
+                for col in ["location", "department", "category"]:
+                    if f"select {col}," in lower and f"group by {col}" in lower:
+                        # If no WHERE for non-null/trim present, insert it
+                        if " where " not in lower or (f"{col} is not null" not in lower and "trim(" not in lower):
+                            # Insert WHERE before GROUP BY
+                            parts = sql.split("GROUP BY")
+                            before_group = parts[0]
+                            after_group = "GROUP BY" + "GROUP BY".join(parts[1:])[8:] if len(parts) > 1 else ""
+                            # Check if there's already a WHERE
+                            if " WHERE " in before_group.upper():
+                                # Append condition with AND
+                                normalized = before_group + f" AND {col} IS NOT NULL AND TRIM({col}) != '' " + ("GROUP BY" + after_group if after_group else "")
+                            else:
+                                normalized = before_group + f" WHERE {col} IS NOT NULL AND TRIM({col}) != '' " + ("GROUP BY" + after_group if after_group else "")
+                            return self._sanitize_sql(normalized)
+            return sql
+        except Exception:
+            return sql
     
     def _extract_partial_result_from_chain(self) -> Optional[Dict[str, Any]]:
         """Extract partial results when agent times out but has executed SQL."""
@@ -924,23 +990,24 @@ class EPCLSQLAgent:
                             break
                     preferred_query = preferred_query or last_query
                     try:
-                        result = self.safe_executor.execute_query(preferred_query)
+                        normalized_query = self._normalize_simple_group_count_query(preferred_query)
+                        result = self.safe_executor.execute_query(normalized_query)
                         if result.success:
                             # Format the result using our existing methods
-                            formatted_text = self._format_sql_result_as_text(result.data, preferred_query)
-                            recommendations = self._generate_context_recommendations(preferred_query, result.data)
+                            formatted_text = self._format_sql_result_as_text(result.data, normalized_query)
+                            recommendations = self._generate_context_recommendations(normalized_query, result.data)
                             
                             return {
                                 "success": True,
                                 "response": {
                                     "answer": formatted_text,
-                                    "sql_queries": [preferred_query],
+                                    "sql_queries": [normalized_query],
                                     "explanation": "Query completed successfully after agent timeout.",
                                     "recommendations": recommendations
                                 },
                                 "original_query": "",
                                 "processed_query": "",
-                                "executed_sql": [preferred_query],
+                                "executed_sql": [normalized_query],
                                 "execution_time": 0,
                                 "timestamp": datetime.now().isoformat(),
                                 "chain_of_thought": self.last_chain_of_thought
@@ -950,11 +1017,60 @@ class EPCLSQLAgent:
             
             # Original logic for when we have real results (not just echoed SQL)
             if sql_queries and sql_results and not only_sql_echo:
-                # Format the partial result
+                try:
+                    # Attempt to parse tool output into structured rows
+                    parsed = None
+                    try:
+                        parsed = ast.literal_eval(sql_results[-1])
+                    except Exception:
+                        parsed = None
+                    if isinstance(parsed, list) and last_query:
+                        data = []
+                        lq = last_query.lower()
+                        # Map common tuple shapes to dicts
+                        if any(k in lq for k in ["select location,", "select  location,"]) and "incident" in lq:
+                            for tup in parsed:
+                                if isinstance(tup, (list, tuple)) and len(tup) >= 2:
+                                    loc, cnt = tup[0], tup[1]
+                                    if loc is not None and str(loc).strip() != "":
+                                        data.append({"location": loc, "incident_count": cnt})
+                        elif any(k in lq for k in ["select department,"]):
+                            for tup in parsed:
+                                if isinstance(tup, (list, tuple)) and len(tup) >= 2:
+                                    dept, cnt = tup[0], tup[1]
+                                    if dept is not None and str(dept).strip() != "":
+                                        data.append({"department": dept, "incident_count": cnt})
+                        elif any(k in lq for k in ["select category,"]):
+                            for tup in parsed:
+                                if isinstance(tup, (list, tuple)) and len(tup) >= 2:
+                                    cat, cnt = tup[0], tup[1]
+                                    if cat is not None and str(cat).strip() not in ("", "None", "none", "null", "n/a", "na"):
+                                        data.append({"category": cat, "count": cnt})
+                        # If we built data, format it nicely
+                        if data:
+                            formatted_text = self._format_sql_result_as_text(data, last_query)
+                            return {
+                                "success": True,
+                                "response": {
+                                    "answer": formatted_text,
+                                    "sql_queries": [last_query],
+                                    "explanation": "Results parsed and formatted after agent timeout.",
+                                    "recommendations": []
+                                },
+                                "original_query": "",
+                                "processed_query": "",
+                                "executed_sql": [last_query],
+                                "execution_time": 0,
+                                "timestamp": datetime.now().isoformat(),
+                                "chain_of_thought": self.last_chain_of_thought
+                            }
+                except Exception as parse_err:
+                    logger.warning(f"Failed to parse tool output for formatting: {parse_err}")
+                
+                # Fallback to generic partial text if parsing fails
                 response_text = "Analysis completed with partial results:\n\n"
                 response_text += f"Query executed: {sql_queries[-1]}\n\n"
-                response_text += f"Results: {sql_results[-1][:500]}..."
-                
+                response_text += f"Results: {str(sql_results[-1])[:500]}..."
                 return {
                     "success": True,
                     "response": {
@@ -1113,43 +1229,30 @@ class EPCLSQLAgent:
         """Suggest common queries users might want to ask."""
         suggestions = [
             {
-                "category": "Incident Analysis",
+                "category": "Incidents",
                 "queries": [
                     "How many incidents occurred in the last 6 months?",
                     "What are the top 5 incident categories by frequency?",
-                    "Which locations have the highest incident rates?",
-                    "What is the total cost of incidents this year?",
-                    "Show me the trend of incidents over time"
+                    "Which locations have the highest incident counts?",
+                    "How many open incidents are there?",
+                    "Show incidents with High injury potential"
                 ]
             },
             {
-                "category": "Risk Assessment", 
+                "category": "Hazards",
                 "queries": [
-                    "Which departments have the most high-risk incidents?",
-                    "What are the most common causes of incidents?",
-                    "Show me incidents with high injury potential",
-                    "Which equipment failures led to incidents?",
-                    "What are the worst-case consequences we've seen?"
+                    "How many hazards were reported in the last 6 months?",
+                    "What are the top 5 hazard categories by frequency?",
+                    "Which departments reported the most hazards?",
+                    "Show recent hazards from the last 30 days"
                 ]
             },
             {
-                "category": "Audit & Compliance",
+                "category": "Departments & Locations",
                 "queries": [
-                    "How many audits were completed this year?",
-                    "What are the most common audit findings?",
-                    "Which locations need the most attention based on audits?",
-                    "What is the status of corrective actions?",
-                    "Show me overdue action items"
-                ]
-            },
-            {
-                "category": "Performance Metrics",
-                "queries": [
-                    "What is our incident closure rate?",
-                    "How long does it take to close incidents on average?",
-                    "Which contractors have the best safety record?",
-                    "What is the effectiveness of our safety training?",
-                    "Compare this year's performance to last year"
+                    "Which departments need the most attention?",
+                    "Which locations have the highest incident counts?",
+                    "Incidents by category"
                 ]
             }
         ]
