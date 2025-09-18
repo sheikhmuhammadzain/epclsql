@@ -372,11 +372,11 @@ class EPCLSQLAgent:
         try:
             # Enhanced query mapping for common questions
             query_mappings = {
-                # Department analysis
-                "departments need attention": "SELECT department, COUNT(*) as incident_count, COUNT(CASE WHEN status = 'Open' THEN 1 END) as open_incidents, AVG(CASE WHEN total_cost IS NOT NULL THEN CAST(total_cost AS REAL) END) as avg_cost FROM incident WHERE department IS NOT NULL GROUP BY department ORDER BY incident_count DESC LIMIT 10",
-                "departments most attention": "SELECT department, COUNT(*) as incident_count, COUNT(CASE WHEN status = 'Open' THEN 1 END) as open_incidents, AVG(CASE WHEN total_cost IS NOT NULL THEN CAST(total_cost AS REAL) END) as avg_cost FROM incident WHERE department IS NOT NULL GROUP BY department ORDER BY incident_count DESC LIMIT 10",
-                "which departments": "SELECT department, COUNT(*) as incident_count FROM incident WHERE department IS NOT NULL GROUP BY department ORDER BY incident_count DESC LIMIT 10",
-                "department incidents": "SELECT department, COUNT(*) as incident_count FROM incident WHERE department IS NOT NULL GROUP BY department ORDER BY incident_count DESC LIMIT 10",
+                # Department analysis - enhanced queries
+                "departments need attention": "SELECT department, COUNT(*) as incident_count, COUNT(CASE WHEN status != 'Closed' THEN 1 END) as open_incidents, COUNT(CASE WHEN status = 'Closed' THEN 1 END) as closed_incidents, AVG(CASE WHEN total_cost IS NOT NULL THEN CAST(total_cost AS REAL) END) as avg_cost FROM incident WHERE department IS NOT NULL AND department != '' GROUP BY department ORDER BY open_incidents DESC, incident_count DESC LIMIT 10",
+                "departments most attention": "SELECT department, COUNT(*) as incident_count, COUNT(CASE WHEN status != 'Closed' THEN 1 END) as open_incidents, COUNT(CASE WHEN status = 'Closed' THEN 1 END) as closed_incidents, AVG(CASE WHEN total_cost IS NOT NULL THEN CAST(total_cost AS REAL) END) as avg_cost FROM incident WHERE department IS NOT NULL AND department != '' GROUP BY department ORDER BY open_incidents DESC, incident_count DESC LIMIT 10",
+                "which departments": "SELECT department, COUNT(*) as incident_count, COUNT(CASE WHEN status != 'Closed' THEN 1 END) as open_incidents FROM incident WHERE department IS NOT NULL AND department != '' GROUP BY department ORDER BY incident_count DESC LIMIT 10",
+                "department incidents": "SELECT department, COUNT(*) as incident_count, COUNT(CASE WHEN status != 'Closed' THEN 1 END) as open_incidents FROM incident WHERE department IS NOT NULL AND department != '' GROUP BY department ORDER BY incident_count DESC LIMIT 10",
                 
                 # Location analysis
                 "locations need attention": "SELECT location, COUNT(*) as incident_count, COUNT(CASE WHEN status = 'Open' THEN 1 END) as open_incidents FROM incident WHERE location IS NOT NULL GROUP BY location ORDER BY incident_count DESC LIMIT 10",
@@ -466,31 +466,56 @@ class EPCLSQLAgent:
         if not data:
             return "No results found."
         
-        # Handle department analysis queries
+        # Handle department analysis queries with enhanced formatting
         if "department" in sql_query.lower() and "incident_count" in sql_query.lower():
             if "need attention" in sql_query.lower() or "most attention" in sql_query.lower():
-                result_text = "Based on incident data, here are the departments that need the most attention:\n\n"
-                for i, row in enumerate(data[:5], 1):
+                result_text = "🚨 **DEPARTMENTS REQUIRING IMMEDIATE ATTENTION**\n\n"
+                result_text += "Based on open incidents and total incident history:\n\n"
+                
+                total_incidents = sum(row.get('incident_count', 0) for row in data)
+                total_open = sum(row.get('open_incidents', 0) for row in data)
+                
+                for i, row in enumerate(data[:7], 1):
                     dept = row.get('department', 'Unknown')
                     count = row.get('incident_count', 0)
                     open_incidents = row.get('open_incidents', 0)
+                    closed_incidents = row.get('closed_incidents', 0)
                     avg_cost = row.get('avg_cost')
                     
-                    result_text += f"{i}. **{dept}**\n"
-                    result_text += f"   • Total incidents: {count}\n"
-                    if open_incidents is not None:
-                        result_text += f"   • Open incidents: {open_incidents}\n"
-                    if avg_cost is not None:
-                        result_text += f"   • Average cost: ${avg_cost:,.2f}\n"
+                    # Calculate percentages
+                    incident_percentage = (count / total_incidents * 100) if total_incidents > 0 else 0
+                    open_percentage = (open_incidents / total_open * 100) if total_open > 0 else 0
+                    
+                    # Priority indicator
+                    if open_incidents > 20:
+                        priority = "🔴 CRITICAL"
+                    elif open_incidents > 10:
+                        priority = "🟡 HIGH"
+                    elif open_incidents > 5:
+                        priority = "🟢 MEDIUM"
+                    else:
+                        priority = "⚪ LOW"
+                    
+                    result_text += f"{i}. **{dept}** {priority}\n"
+                    result_text += f"   📊 Total incidents: {count} ({incident_percentage:.1f}% of all incidents)\n"
+                    result_text += f"   🚨 Open incidents: {open_incidents} ({open_percentage:.1f}% of all open)\n"
+                    result_text += f"   ✅ Closed incidents: {closed_incidents}\n"
+                    if avg_cost is not None and avg_cost > 0:
+                        result_text += f"   💰 Average cost: ${avg_cost:,.2f}\n"
                     result_text += "\n"
                 
+                result_text += f"\n📈 **SUMMARY**: {len(data)} departments analyzed, {total_incidents} total incidents, {total_open} currently open"
                 return result_text.strip()
             else:
-                result_text = "Incidents by department:\n\n"
+                result_text = "📊 **INCIDENT ANALYSIS BY DEPARTMENT**\n\n"
                 for i, row in enumerate(data[:10], 1):
                     dept = row.get('department', 'Unknown')
                     count = row.get('incident_count', 0)
-                    result_text += f"{i}. {dept}: {count} incidents\n"
+                    open_incidents = row.get('open_incidents', 0)
+                    result_text += f"{i}. **{dept}**: {count} total incidents"
+                    if open_incidents is not None:
+                        result_text += f" ({open_incidents} open)"
+                    result_text += "\n"
                 return result_text.strip()
         
         # Handle location analysis
@@ -724,23 +749,48 @@ class EPCLSQLAgent:
         # Extract SQL queries from chain of thought
         for step in self.last_chain_of_thought:
             if step.get("type") == "tool_end" and step.get("output"):
-                output = step.get("output", "")
+                raw_output = step.get("output", "")
+                output = self._sanitize_sql(raw_output)
                 # Look for SQL queries in the output
-                if "SELECT" in output.upper() or "INSERT" in output.upper() or "UPDATE" in output.upper() or "DELETE" in output.upper():
-                    # Extract SQL query from the output
+                if any(kw in output.upper() for kw in ("SELECT", "INSERT", "UPDATE", "DELETE", "WITH")):
+                    # Try to extract the first SQL-like line
                     lines = output.split('\n')
                     for line in lines:
-                        line = line.strip()
-                        if line.upper().startswith(('SELECT', 'INSERT', 'UPDATE', 'DELETE', 'WITH')):
-                            executed_queries.append(line)
+                        clean_line = self._sanitize_sql(line.strip())
+                        if clean_line.upper().startswith(("SELECT", "INSERT", "UPDATE", "DELETE", "WITH")):
+                            executed_queries.append(clean_line)
                             break
             elif step.get("type") == "action" and step.get("tool") == "sql_db_query":
                 # Direct SQL query action
                 tool_input = step.get("tool_input", "")
                 if isinstance(tool_input, str) and tool_input.strip():
-                    executed_queries.append(tool_input.strip())
+                    executed_queries.append(self._sanitize_sql(tool_input.strip()))
         
         return executed_queries
+
+    def _sanitize_sql(self, sql: str) -> str:
+        """Remove markdown/code-fence artifacts and stray backticks from SQL strings."""
+        if not isinstance(sql, str):
+            return sql
+        s = sql.strip()
+        # Remove common code-fence patterns like ```sql ... ``` or ``` ... ```
+        if s.startswith("```") and s.endswith("```"):
+            s = s[3:-3]
+        # Remove language tag like 'sql' at the start after fence removal
+        s = s.lstrip()
+        if s.lower().startswith("sql\n"):
+            s = s[4:]
+        if s.lower().startswith("sql") and s[3:4].isspace():
+            s = s[3:].lstrip()
+        # Remove any stray backticks and weird triple backtick remnants
+        s = s.replace("`", "")
+        # Remove enclosing quotes " or ' if they wrap the entire statement
+        if (s.startswith("\"") and s.endswith("\"")) or (s.startswith("'") and s.endswith("'")):
+            s = s[1:-1]
+        # Collapse whitespace
+        lines = [ln.strip() for ln in s.splitlines()]
+        s = " ".join([ln for ln in lines if ln])
+        return s.strip()
     
     def _extract_partial_result_from_chain(self) -> Optional[Dict[str, Any]]:
         """Extract partial results when agent times out but has executed SQL."""
@@ -748,17 +798,47 @@ class EPCLSQLAgent:
             # Look for SQL query results in the chain of thought
             sql_queries = []
             sql_results = []
-            
+            last_query = None
+        
             for step in self.last_chain_of_thought:
                 if step.get("type") == "action" and step.get("tool") == "sql_db_query":
                     tool_input = step.get("tool_input", "")
-                    if tool_input.strip():
-                        sql_queries.append(tool_input.strip())
+                    if isinstance(tool_input, str) and tool_input.strip():
+                        last_query = self._sanitize_sql(tool_input.strip())
+                        sql_queries.append(last_query)
                 elif step.get("type") == "tool_end" and step.get("output"):
-                    output = step.get("output", "")
+                    output = self._sanitize_sql(step.get("output", ""))
                     if output and len(output) > 10:  # Has meaningful output
                         sql_results.append(output)
+        
+            # If we have a query but no results, try to execute it directly
+            if last_query and not sql_results:
+                try:
+                    result = self.safe_executor.execute_query(last_query)
+                    if result.success and result.data:
+                        # Format the result using our existing methods
+                        formatted_text = self._format_sql_result_as_text(result.data, last_query)
+                        recommendations = self._generate_context_recommendations(last_query, result.data)
+                        
+                        return {
+                            "success": True,
+                            "response": {
+                                "answer": formatted_text,
+                                "sql_queries": [last_query],
+                                "explanation": "Query completed successfully after agent timeout.",
+                                "recommendations": recommendations
+                            },
+                            "original_query": "",
+                            "processed_query": "",
+                            "executed_sql": [last_query],
+                            "execution_time": 0,
+                            "timestamp": datetime.now().isoformat(),
+                            "chain_of_thought": self.last_chain_of_thought
+                        }
+                except Exception as exec_error:
+                    logger.error(f"Failed to execute partial query: {exec_error}")
             
+            # Original logic for when we have results
             if sql_queries and sql_results:
                 # Format the partial result
                 response_text = "Analysis completed with partial results:\n\n"
