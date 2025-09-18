@@ -73,6 +73,8 @@ EPCL_API_KEY=epcl-demo-key-2024
 DATABASE_PATH=epcl_vehs.db
 HOST=127.0.0.1
 PORT=8000
+PUBLIC_HOST=0.0.0.0
+PUBLIC_PORT=8000
 LOG_LEVEL=INFO
 MAX_QUERIES_PER_MINUTE=10
 MAX_QUERIES_PER_HOUR=100
@@ -157,20 +159,42 @@ MAX_QUERIES_PER_HOUR=100
         logger.info("✅ OpenAI API key configured")
         return True
     
-    def run_development_server(self, use_simple=False):
+    def run_development_server(self, use_simple=False, public=False):
         """Run the development server."""
+        from dotenv import load_dotenv
+        load_dotenv(self.env_file)
+        
         app_module = "main_simple:app" if use_simple else "main:app"
         server_type = "simplified" if use_simple else "full"
         
+        # Determine host and port
+        if public:
+            host = os.getenv("PUBLIC_HOST", "0.0.0.0")
+            port = os.getenv("PUBLIC_PORT", "8000")
+            access_info = f"Server will be available publicly at http://<your-ip>:{port}"
+            security_warning = "⚠️  WARNING: Server is accessible from any IP address. Ensure proper security measures!"
+        else:
+            host = os.getenv("HOST", "127.0.0.1")
+            port = os.getenv("PORT", "8000")
+            access_info = f"Server will be available at http://{host}:{port}"
+            security_warning = None
+        
         logger.info(f"Starting {server_type} development server...")
-        logger.info("Server will be available at http://127.0.0.1:8000")
+        logger.info(access_info)
+        if security_warning:
+            logger.warning(security_warning)
+            logger.info("🔒 Security recommendations for public access:")
+            logger.info("   • Use strong API keys")
+            logger.info("   • Enable rate limiting")
+            logger.info("   • Use HTTPS in production")
+            logger.info("   • Configure firewall rules")
         logger.info("Press Ctrl+C to stop the server")
         
         try:
             subprocess.run([
                 sys.executable, "-m", "uvicorn", app_module, 
-                "--host", "127.0.0.1", 
-                "--port", "8000", 
+                "--host", host, 
+                "--port", port, 
                 "--reload",
                 "--log-level", "info"
             ], cwd=self.project_root)
@@ -181,9 +205,9 @@ MAX_QUERIES_PER_HOUR=100
             logger.error(f"Server failed to start: {e}")
             if not use_simple:
                 logger.info("Trying simplified version...")
-                self.run_development_server(use_simple=True)
+                self.run_development_server(use_simple=True, public=public)
     
-    def run_production_server(self):
+    def run_production_server(self, public=False):
         """Run the production server using Docker."""
         logger.info("Starting production server with Docker...")
         
@@ -191,16 +215,27 @@ MAX_QUERIES_PER_HOUR=100
             # Check if Docker is available
             subprocess.run(["docker", "--version"], check=True, capture_output=True)
             
+            # Set environment variables for Docker
+            env = os.environ.copy()
+            if public:
+                env["HOST"] = "0.0.0.0"
+                logger.warning("⚠️  WARNING: Production server will be accessible from any IP address!")
+            
             # Build and run with docker-compose
             subprocess.run([
                 "docker-compose", "up", "--build", "-d"
-            ], check=True, cwd=self.project_root)
+            ], check=True, cwd=self.project_root, env=env)
             
             logger.info("✅ Production server started successfully")
             logger.info("Services:")
-            logger.info("  - API: http://localhost:8000")
-            logger.info("  - Grafana: http://localhost:3000 (admin/admin123)")
-            logger.info("  - Prometheus: http://localhost:9090")
+            if public:
+                logger.info("  - API: http://<your-ip>:8000 (publicly accessible)")
+                logger.info("  - Grafana: http://<your-ip>:3000 (admin/admin123)")
+                logger.info("  - Prometheus: http://<your-ip>:9090")
+            else:
+                logger.info("  - API: http://localhost:8000")
+                logger.info("  - Grafana: http://localhost:3000 (admin/admin123)")
+                logger.info("  - Prometheus: http://localhost:9090")
             
             logger.info("To stop the services, run: docker-compose down")
             
@@ -249,6 +284,7 @@ def main():
     parser.add_argument("--dev", action="store_true", help="Run in development mode")
     parser.add_argument("--simple", action="store_true", help="Run simplified version (SQL-only, no LangChain)")
     parser.add_argument("--production", action="store_true", help="Run in production mode")
+    parser.add_argument("--public", action="store_true", help="Bind to 0.0.0.0 for public access (use with --dev or --production)")
     parser.add_argument("--status", action="store_true", help="Show system status")
     parser.add_argument("--install", action="store_true", help="Install dependencies only")
     
@@ -302,11 +338,11 @@ def main():
     
     # Run the appropriate server
     if args.production:
-        runner.run_production_server()
+        runner.run_production_server(public=args.public)
     elif args.simple:
-        runner.run_development_server(use_simple=True)
+        runner.run_development_server(use_simple=True, public=args.public)
     elif args.dev:
-        runner.run_development_server(use_simple=False)
+        runner.run_development_server(use_simple=False, public=args.public)
     else:
         # Default: show help and status
         parser.print_help()
@@ -314,8 +350,11 @@ def main():
         runner.show_system_status()
         print("\nTo start the system:")
         print("  Development: python run_system.py --dev")
+        print("  Public Dev:  python run_system.py --dev --public")
         print("  Simplified:  python run_system.py --simple")
         print("  Production:  python run_system.py --production")
+        print("  Public Prod: python run_system.py --production --public")
+        print("\n⚠️  Use --public flag to bind to 0.0.0.0 for external access")
 
 
 if __name__ == "__main__":
