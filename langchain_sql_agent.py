@@ -26,6 +26,7 @@ import logging
 from typing import Dict, List, Any, Optional, Tuple
 from datetime import datetime
 import sqlite3
+import ast
 
 # LangChain imports
 from langchain_community.utilities import SQLDatabase
@@ -168,6 +169,22 @@ class EPCLSQLAgent:
         # Initialize database connection for LangChain
         self.db = SQLDatabase.from_uri(f"sqlite:///{db_path}")
         
+        # Monkey-patch db.run to sanitize incoming SQL (prevents ```sql ... ``` issues)
+        try:
+            original_run = self.db.run
+
+            def _sanitized_run(query: str, *args, **kwargs):  # type: ignore
+                try:
+                    clean_query = self._sanitize_sql(query)
+                except Exception:
+                    clean_query = query
+                return original_run(clean_query, *args, **kwargs)
+
+            self.db.run = _sanitized_run  # type: ignore
+        except Exception:
+            # If patching fails, continue without it (fallback sanitization still applies)
+            pass
+        
         # Create custom toolkit
         self.toolkit = SQLDatabaseToolkit(db=self.db, llm=self.llm)
         
@@ -290,6 +307,61 @@ class EPCLSQLAgent:
             # Extract and validate any SQL that was executed
             executed_queries = self._extract_executed_queries()
             
+            # If the agent finished but didn't return executed queries, try to recover from chain
+            if not executed_queries:
+                has_sql_action = any(
+                    step.get("type") == "action" and step.get("tool") == "sql_db_query"
+                    for step in self.last_chain_of_thought
+                )
+                has_error_output = any(
+                    step.get("type") == "tool_end" and isinstance(step.get("output"), str) and "error" in step.get("output").lower()
+                    for step in self.last_chain_of_thought
+                )
+                if has_sql_action or has_error_output or "```" in agent_response:
+                    partial = self._extract_partial_result_from_chain()
+                    if partial:
+                        return partial
+            else:
+                # We DO have executed queries; try to run the most relevant one to produce a concrete answer
+                try:
+                    preferred_query = None
+                    # Prefer audit findings for findings-type questions
+                    for q in executed_queries:
+                        if "audit_findings" in q.lower():
+                            preferred_query = q
+                            break
+                    # Else prefer inspection findings
+                    if not preferred_query:
+                        for q in executed_queries:
+                            if "inspection_findings" in q.lower():
+                                preferred_query = q
+                                break
+                    # Else pick the first
+                    preferred_query = preferred_query or executed_queries[0]
+                    # Execute preferred query
+                    exec_result = self.safe_executor.execute_query(preferred_query)
+                    if exec_result.success:
+                        concrete_answer = self._format_sql_result_as_text(exec_result.data or [], preferred_query)
+                        recs = self._generate_context_recommendations(preferred_query, exec_result.data or [])
+                        execution_time = (datetime.now() - start_time).total_seconds()
+                        return {
+                            "success": True,
+                            "response": {
+                                "answer": concrete_answer,
+                                "sql_queries": [preferred_query],
+                                "explanation": "Answer derived from executed SQL extracted from the agent run.",
+                                "recommendations": recs
+                            },
+                            "original_query": user_input,
+                            "processed_query": processed_input,
+                            "executed_sql": [preferred_query],
+                            "execution_time": execution_time,
+                            "timestamp": start_time.isoformat(),
+                            "chain_of_thought": self.last_chain_of_thought
+                        }
+                except Exception as e:
+                    logger.warning(f"Failed executing extracted SQL: {e}")
+            
             # Format response with additional context
             formatted_response = self._format_response(
                 agent_response, 
@@ -337,8 +409,7 @@ class EPCLSQLAgent:
             "accidents": "incidents",
             "mishaps": "incidents", 
             "events": "incidents",
-            "inspections": "audits or inspections",
-            "findings": "audit findings or inspection findings",
+            # Avoid expanding 'findings' or 'inspections' generically, as it confuses intent
             "last year": f"from {datetime.now().year - 1}-01-01 to {datetime.now().year - 1}-12-31",
             "this year": f"from {datetime.now().year}-01-01",
             "recent": "last 3 months",
@@ -350,6 +421,10 @@ class EPCLSQLAgent:
         processed = user_input.lower()
         for old_term, new_term in replacements.items():
             processed = processed.replace(old_term, new_term)
+        
+        # Preserve specificity: if the user explicitly mentions 'audit findings' or 'inspection findings',
+        # do NOT expand or alter the wording further.
+        # We intentionally do not auto-expand generic 'findings' to both tables.
         
         # Add context about the reporting period
         if "trend" in processed or "over time" in processed:
@@ -377,6 +452,13 @@ class EPCLSQLAgent:
                 "departments most attention": "SELECT department, COUNT(*) as incident_count, COUNT(CASE WHEN status != 'Closed' THEN 1 END) as open_incidents, COUNT(CASE WHEN status = 'Closed' THEN 1 END) as closed_incidents, AVG(CASE WHEN total_cost IS NOT NULL THEN CAST(total_cost AS REAL) END) as avg_cost FROM incident WHERE department IS NOT NULL AND department != '' GROUP BY department ORDER BY open_incidents DESC, incident_count DESC LIMIT 10",
                 "which departments": "SELECT department, COUNT(*) as incident_count, COUNT(CASE WHEN status != 'Closed' THEN 1 END) as open_incidents FROM incident WHERE department IS NOT NULL AND department != '' GROUP BY department ORDER BY incident_count DESC LIMIT 10",
                 "department incidents": "SELECT department, COUNT(*) as incident_count, COUNT(CASE WHEN status != 'Closed' THEN 1 END) as open_incidents FROM incident WHERE department IS NOT NULL AND department != '' GROUP BY department ORDER BY incident_count DESC LIMIT 10",
+
+                # Findings analysis (audit and inspection)
+                "most common audit findings": "SELECT finding, COUNT(*) as count FROM audit_findings WHERE finding IS NOT NULL AND TRIM(finding) != '' GROUP BY finding ORDER BY count DESC LIMIT 10",
+                "common audit findings": "SELECT finding, COUNT(*) as count FROM audit_findings WHERE finding IS NOT NULL AND TRIM(finding) != '' GROUP BY finding ORDER BY count DESC LIMIT 10",
+                "most common inspection findings": "SELECT finding, COUNT(*) as count FROM inspection_findings WHERE finding IS NOT NULL AND TRIM(finding) != '' GROUP BY finding ORDER BY count DESC LIMIT 10",
+                "common inspection findings": "SELECT finding, COUNT(*) as count FROM inspection_findings WHERE finding IS NOT NULL AND TRIM(finding) != '' GROUP BY finding ORDER BY count DESC LIMIT 10",
+                "most common findings": "SELECT 'audit' as source, finding, COUNT(*) as count FROM audit_findings WHERE finding IS NOT NULL AND TRIM(finding) != '' GROUP BY finding UNION ALL SELECT 'inspection' as source, finding, COUNT(*) as count FROM inspection_findings WHERE finding IS NOT NULL AND TRIM(finding) != '' GROUP BY finding ORDER BY count DESC LIMIT 10",
                 
                 # Location analysis
                 "locations need attention": "SELECT location, COUNT(*) as incident_count, COUNT(CASE WHEN status = 'Open' THEN 1 END) as open_incidents FROM incident WHERE location IS NOT NULL GROUP BY location ORDER BY incident_count DESC LIMIT 10",
@@ -538,6 +620,21 @@ class EPCLSQLAgent:
                 category = row.get('category', 'Unknown')
                 count = row.get('count', 0)
                 result_text += f"{i}. {category}: {count} incidents\n"
+            return result_text.strip()
+
+        # Handle findings analysis (audit/inspection)
+        if ("audit_findings" in sql_query.lower() or "inspection_findings" in sql_query.lower()) and "GROUP BY" in sql_query.upper() and "finding" in sql_query.lower():
+            title = "Top findings"
+            if "audit_findings" in sql_query.lower() and "inspection_findings" not in sql_query.lower():
+                title = "Top audit findings"
+            elif "inspection_findings" in sql_query.lower() and "audit_findings" not in sql_query.lower():
+                title = "Top inspection findings"
+            result_text = f"{title}:\n\n"
+            for i, row in enumerate(data[:10], 1):
+                raw_finding = row.get('finding') or row.get('FINDING')
+                finding = (raw_finding or '').strip() or 'Unspecified'
+                count = row.get('count') or row.get('COUNT') or 0
+                result_text += f"{i}. {finding}: {count}\n"
             return result_text.strip()
         
         # Handle cost analysis
@@ -811,35 +908,48 @@ class EPCLSQLAgent:
                     if output and len(output) > 10:  # Has meaningful output
                         sql_results.append(output)
         
-            # If we have a query but no results, try to execute it directly
-            if last_query and not sql_results:
-                try:
-                    result = self.safe_executor.execute_query(last_query)
-                    if result.success and result.data:
-                        # Format the result using our existing methods
-                        formatted_text = self._format_sql_result_as_text(result.data, last_query)
-                        recommendations = self._generate_context_recommendations(last_query, result.data)
-                        
-                        return {
-                            "success": True,
-                            "response": {
-                                "answer": formatted_text,
-                                "sql_queries": [last_query],
-                                "explanation": "Query completed successfully after agent timeout.",
-                                "recommendations": recommendations
-                            },
-                            "original_query": "",
-                            "processed_query": "",
-                            "executed_sql": [last_query],
-                            "execution_time": 0,
-                            "timestamp": datetime.now().isoformat(),
-                            "chain_of_thought": self.last_chain_of_thought
-                        }
-                except Exception as exec_error:
-                    logger.error(f"Failed to execute partial query: {exec_error}")
+            # If we have captured any query but either no results, or results are just an echoed SQL string, execute preferred query directly
+            if last_query or sql_queries:
+                only_sql_echo = False
+                if sql_results:
+                    last_output = self._sanitize_sql(str(sql_results[-1])).strip()
+                    if last_output.upper().startswith(("SELECT", "WITH", "INSERT", "UPDATE", "DELETE")):
+                        only_sql_echo = True
+                if not sql_results or only_sql_echo:
+                    # Prefer an audit findings query if present when multiple queries are detected
+                    preferred_query = last_query
+                    for q in sql_queries:
+                        if "audit_findings" in q.lower():
+                            preferred_query = q
+                            break
+                    preferred_query = preferred_query or last_query
+                    try:
+                        result = self.safe_executor.execute_query(preferred_query)
+                        if result.success:
+                            # Format the result using our existing methods
+                            formatted_text = self._format_sql_result_as_text(result.data, preferred_query)
+                            recommendations = self._generate_context_recommendations(preferred_query, result.data)
+                            
+                            return {
+                                "success": True,
+                                "response": {
+                                    "answer": formatted_text,
+                                    "sql_queries": [preferred_query],
+                                    "explanation": "Query completed successfully after agent timeout.",
+                                    "recommendations": recommendations
+                                },
+                                "original_query": "",
+                                "processed_query": "",
+                                "executed_sql": [preferred_query],
+                                "execution_time": 0,
+                                "timestamp": datetime.now().isoformat(),
+                                "chain_of_thought": self.last_chain_of_thought
+                            }
+                    except Exception as exec_error:
+                        logger.error(f"Failed to execute partial query: {exec_error}")
             
-            # Original logic for when we have results
-            if sql_queries and sql_results:
+            # Original logic for when we have real results (not just echoed SQL)
+            if sql_queries and sql_results and not only_sql_echo:
                 # Format the partial result
                 response_text = "Analysis completed with partial results:\n\n"
                 response_text += f"Query executed: {sql_queries[-1]}\n\n"
