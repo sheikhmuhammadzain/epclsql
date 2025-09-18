@@ -1,0 +1,174 @@
+2025-09-18 17:01:38,770 - INFO - Starting EPCL VEHS data ingestion...
+2025-09-18 17:01:38,770 - INFO - Reading Excel file: EPCL VEHS Data (Mar23 - Mar24).xlsx
+2025-09-18 17:01:54,159 - INFO - Found 6 sheets
+2025-09-18 17:01:54,161 - INFO - Creating database schema...
+2025-09-18 17:01:54,178 - INFO - Database schema created successfully
+2025-09-18 17:01:54,180 - INFO - Processing sheet 'Incident' -> table 'incident'
+2025-09-18 17:01:54,242 - WARNING - Could not parse date column date_of_occurrence: Must specify a fill 'value' or 'method'.
+2025-09-18 17:01:54,246 - WARNING - Could not parse date column incident_time: Must specify a fill 'value' or 'method'.
+2025-09-18 17:01:54,284 - WARNING - Could not parse date column date_shift_began: Cannot mix tz-aware with tz-naive values
+2025-09-18 17:01:54,288 - WARNING - Could not parse date column time_shift_began: Must specify a fill 'value' or 'method'.
+2025-09-18 17:01:54,294 - WARNING - Could not parse date column date_reported: Must specify a fill 'value' or 'method'.
+2025-09-18 17:01:54,298 - WARNING - Could not parse date column date_entered: Must specify a fill 'value' or 'method'.
+2025-09-18 17:01:54,303 - WARNING - Could not parse date column task_or_activity_at_time_of_incident: Must specify a fill 'value' or 'method'.
+2025-09-18 17:01:54,307 - WARNING - Could not parse date column date_reported_to_agency: Must specify a fill 'value' or 'method'.
+2025-09-18 17:01:54,317 - WARNING - Could not parse date column target_completion_date: Must specify a fill 'value' or 'method'.
+2025-09-18 17:01:54,322 - WARNING - Could not parse date column completion_date: Must specify a fill 'value' or 'method'.
+2025-09-18 17:01:54,326 - WARNING - Could not parse date column date_of_birth: Must specify a fill 'value' or 'method'.
+2025-09-18 17:01:54,329 - WARNING - Could not parse date column hire_date: Must specify a fill 'value' or 'method'.
+2025-09-18 17:01:54,337 - WARNING - Could not parse date column time_to_contain: Must specify a fill 'value' or 'method'.
+2025-09-18 17:01:54,361 - WARNING - Could not parse date column entered_investigation: Can only use .dt accessor with datetimelike values
+2025-09-18 17:01:54,366 - WARNING - Could not parse date column entered_review: Can only use .dt accessor with datetimelike values
+2025-09-18 17:01:54,396 - WARNING - Could not parse date column entered_pending_closure: Can only use .dt accessor with datetimelike values
+2025-09-18 17:01:54,409 - WARNING - Could not parse date column entered_closed: Can only use .dt accessor with datetimelike values
+2025-09-18 17:01:54,415 - WARNING - Could not parse date column task_or_activity_at_time_of_incident1: Must specify a fill 'value' or 'method'.
+2025-09-18 17:01:54,420 - WARNING - Could not parse date column behavioral_violation_at_the_time_of_incident: Must specify a fill 'value' or 'method'.
+2025-09-18 17:01:54,425 - WARNING - Could not parse date column issues_with_vehicle_at_the_time_of_incident: Must specify a fill 'value' or 'method'.
+2025-09-18 17:01:54,428 - INFO - Cleaned numeric column: incident_number
+2025-09-18 17:01:54,431 - INFO - Cleaned numeric column: dlevel_committee_number_epcl
+2025-09-18 17:01:54,433 - INFO - Cleaned numeric column: external_report_number
+2025-09-18 17:01:54,434 - INFO - Cleaned numeric column: restricted_days
+2025-09-18 17:01:54,435 - INFO - Cleaned numeric column: lost_days
+2025-09-18 17:01:54,437 - INFO - Cleaned numeric column: quantity_contaminated
+2025-09-18 17:01:54,438 - INFO - Cleaned numeric column: years_in_present_job
+2025-09-18 17:01:54,439 - INFO - Cleaned numeric column: total_years_experience
+2025-09-18 17:01:54,440 - INFO - Cleaned numeric column: cas_number
+2025-09-18 17:01:54,441 - INFO - Cleaned numeric column: quantity_released
+2025-09-18 17:01:54,442 - INFO - Cleaned numeric column: quantity_recovered
+2025-09-18 17:01:54,444 - INFO - Cleaned numeric column: cost_type
+2025-09-18 17:01:54,444 - INFO - Cleaned numeric column: total_cost
+2025-09-18 17:01:54,446 - INFO - Cleaned numeric column: actual_leakage_quantity
+2025-09-18 17:01:57,545 - INFO - Inserted 2596 records into incident
+2025-09-18 17:01:57,563 - INFO - Created index: idx_incident_date_of_occurrence
+2025-09-18 17:01:57,580 - INFO - Created index: idx_incident_incident_number
+2025-09-18 17:01:57,598 - INFO - Created index: idx_incident_location
+2025-09-18 17:01:57,616 - INFO - Created index: idx_incident_department
+2025-09-18 17:01:57,635 - INFO - Created index: idx_incident_category
+2025-09-18 17:01:57,650 - INFO - Created index: idx_incident_status
+2025-09-18 17:01:57,668 - INFO - Created index: idx_incident_incident_type
+2025-09-18 17:01:57,681 - INFO - Sheet 'Incident' -> Table 'incident': {'records_processed': 2596, 'records_inserted': 2596, 'status': 'success'}
+2025-09-18 17:01:57,681 - INFO - Processing sheet 'Hazard ID' -> table 'hazard_id'
+2025-09-18 17:01:57,689 - WARNING - Could not parse date column date_of_occurrence: Must specify a fill 'value' or 'method'.
+2025-09-18 17:01:57,690 - WARNING - Could not parse date column incident_time: Must specify a fill 'value' or 'method'.
+2025-09-18 17:01:57,691 - WARNING - Could not parse date column date_shift_began: Must specify a fill 'value' or 'method'.
+2025-09-18 17:01:57,692 - WARNING - Could not parse date column time_shift_began: Must specify a fill 'value' or 'method'.
+2025-09-18 17:01:57,696 - WARNING - Could not parse date column date_reported: Must specify a fill 'value' or 'method'.
+2025-09-18 17:01:57,700 - WARNING - Could not parse date column date_entered: Must specify a fill 'value' or 'method'.
+2025-09-18 17:01:57,702 - WARNING - Could not parse date column task_or_activity_at_time_of_incident: Must specify a fill 'value' or 'method'.
+2025-09-18 17:01:57,703 - WARNING - Could not parse date column date_reported_to_agency: Must specify a fill 'value' or 'method'.
+2025-09-18 17:01:57,705 - WARNING - Could not parse date column target_completion_date: Must specify a fill 'value' or 'method'.
+2025-09-18 17:01:57,706 - WARNING - Could not parse date column completion_date: Must specify a fill 'value' or 'method'.
+2025-09-18 17:01:57,707 - WARNING - Could not parse date column date_of_birth: Must specify a fill 'value' or 'method'.
+2025-09-18 17:01:57,709 - WARNING - Could not parse date column hire_date: Must specify a fill 'value' or 'method'.
+2025-09-18 17:01:57,710 - WARNING - Could not parse date column time_to_contain: Must specify a fill 'value' or 'method'.
+2025-09-18 17:01:57,710 - WARNING - Could not parse date column entered_investigation: Must specify a fill 'value' or 'method'.
+2025-09-18 17:01:57,712 - WARNING - Could not parse date column entered_review: Cannot mix tz-aware with tz-naive values
+2025-09-18 17:01:57,713 - WARNING - Could not parse date column entered_pending_closure: Must specify a fill 'value' or 'method'.
+2025-09-18 17:01:57,714 - WARNING - Could not parse date column entered_closed: Cannot mix tz-aware with tz-naive values
+2025-09-18 17:01:57,716 - WARNING - Could not parse date column task_or_activity_at_time_of_incident1: Must specify a fill 'value' or 'method'.
+2025-09-18 17:01:57,717 - WARNING - Could not parse date column behavioral_violation_at_the_time_of_incident: Must specify a fill 'value' or 'method'.
+2025-09-18 17:01:57,718 - WARNING - Could not parse date column issues_with_vehicle_at_the_time_of_incident: Must specify a fill 'value' or 'method'.
+2025-09-18 17:01:57,720 - INFO - Cleaned numeric column: incident_number
+2025-09-18 17:01:57,721 - INFO - Cleaned numeric column: dlevel_committee_number_epcl
+2025-09-18 17:01:57,722 - INFO - Cleaned numeric column: external_report_number
+2025-09-18 17:01:57,723 - INFO - Cleaned numeric column: restricted_days
+2025-09-18 17:01:57,723 - INFO - Cleaned numeric column: lost_days
+2025-09-18 17:01:57,725 - INFO - Cleaned numeric column: quantity_contaminated
+2025-09-18 17:01:57,725 - INFO - Cleaned numeric column: years_in_present_job
+2025-09-18 17:01:57,725 - INFO - Cleaned numeric column: total_years_experience
+2025-09-18 17:01:57,726 - INFO - Cleaned numeric column: cas_number
+2025-09-18 17:01:57,727 - INFO - Cleaned numeric column: quantity_released
+2025-09-18 17:01:57,727 - INFO - Cleaned numeric column: quantity_recovered
+2025-09-18 17:01:57,727 - INFO - Cleaned numeric column: cost_type
+2025-09-18 17:01:57,727 - INFO - Cleaned numeric column: total_cost
+2025-09-18 17:01:57,729 - INFO - Cleaned numeric column: actual_leakage_quantity
+2025-09-18 17:01:59,060 - INFO - Inserted 1211 records into hazard_id
+2025-09-18 17:01:59,071 - INFO - Created index: idx_hazard_id_date_of_occurrence
+2025-09-18 17:01:59,080 - INFO - Created index: idx_hazard_id_incident_number
+2025-09-18 17:01:59,090 - INFO - Created index: idx_hazard_id_location
+2025-09-18 17:01:59,098 - INFO - Created index: idx_hazard_id_department
+2025-09-18 17:01:59,108 - INFO - Created index: idx_hazard_id_category
+2025-09-18 17:01:59,120 - INFO - Created index: idx_hazard_id_status
+2025-09-18 17:01:59,129 - INFO - Created index: idx_hazard_id_incident_type
+2025-09-18 17:01:59,137 - INFO - Sheet 'Hazard ID' -> Table 'hazard_id': {'records_processed': 1211, 'records_inserted': 1211, 'status': 'success'}
+2025-09-18 17:01:59,138 - INFO - Processing sheet 'Audit' -> table 'audit'
+2025-09-18 17:01:59,145 - WARNING - Could not parse date column start_date: Must specify a fill 'value' or 'method'.
+2025-09-18 17:01:59,149 - WARNING - Could not parse date column entered_scheduled: Must specify a fill 'value' or 'method'.
+2025-09-18 17:01:59,155 - WARNING - Could not parse date column entered_in_progress: Must specify a fill 'value' or 'method'.
+2025-09-18 17:01:59,160 - WARNING - Could not parse date column entered_review: Must specify a fill 'value' or 'method'.
+2025-09-18 17:01:59,168 - WARNING - Could not parse date column entered_pending_action_plan: Can only use .dt accessor with datetimelike values
+2025-09-18 17:01:59,178 - WARNING - Could not parse date column entered_review_action_plan: Can only use .dt accessor with datetimelike values
+2025-09-18 17:01:59,179 - WARNING - Could not parse date column entered_pending_closure: Cannot mix tz-aware with tz-naive values
+2025-09-18 17:01:59,184 - WARNING - Could not parse date column entered_closed: Must specify a fill 'value' or 'method'.
+2025-09-18 17:01:59,190 - WARNING - Could not parse date column action_item_due_date: Cannot mix tz-aware with tz-naive values
+2025-09-18 17:01:59,194 - WARNING - Could not parse date column action_item_verification_due_date: Must specify a fill 'value' or 'method'.
+2025-09-18 17:01:59,196 - INFO - Cleaned numeric column: audit_number
+2025-09-18 17:01:59,197 - INFO - Cleaned numeric column: audit_rating
+2025-09-18 17:01:59,198 - INFO - Cleaned numeric column: action_item_number
+2025-09-18 17:01:59,998 - INFO - Inserted 1522 records into audit
+2025-09-18 17:02:00,028 - INFO - Created index: idx_audit_audit_number
+2025-09-18 17:02:00,057 - INFO - Created index: idx_audit_audit_status
+2025-09-18 17:02:00,082 - INFO - Created index: idx_audit_start_date
+2025-09-18 17:02:00,091 - INFO - Sheet 'Audit' -> Table 'audit': {'records_processed': 1522, 'records_inserted': 1522, 'status': 'success'}
+2025-09-18 17:02:00,091 - INFO - Processing sheet 'Audit Findings' -> table 'audit_findings'
+2025-09-18 17:02:00,101 - WARNING - Could not parse date column start_date: Must specify a fill 'value' or 'method'.
+2025-09-18 17:02:00,111 - WARNING - Could not parse date column entered_scheduled: Must specify a fill 'value' or 'method'.
+2025-09-18 17:02:00,123 - WARNING - Could not parse date column entered_in_progress: Must specify a fill 'value' or 'method'.
+2025-09-18 17:02:00,133 - WARNING - Could not parse date column entered_review: Must specify a fill 'value' or 'method'.
+2025-09-18 17:02:00,146 - WARNING - Could not parse date column entered_pending_action_plan: Can only use .dt accessor with datetimelike values
+2025-09-18 17:02:00,158 - WARNING - Could not parse date column entered_review_action_plan: Can only use .dt accessor with datetimelike values
+2025-09-18 17:02:00,161 - WARNING - Could not parse date column entered_pending_closure: Cannot mix tz-aware with tz-naive values
+2025-09-18 17:02:00,173 - WARNING - Could not parse date column entered_closed: Must specify a fill 'value' or 'method'.
+2025-09-18 17:02:00,176 - WARNING - Could not parse date column action_item_due_date: Must specify a fill 'value' or 'method'.
+2025-09-18 17:02:00,179 - WARNING - Could not parse date column action_item_verification_due_date: Must specify a fill 'value' or 'method'.
+2025-09-18 17:02:00,183 - INFO - Cleaned numeric column: audit_number
+2025-09-18 17:02:00,185 - INFO - Cleaned numeric column: audit_rating
+2025-09-18 17:02:00,186 - INFO - Cleaned numeric column: action_item_number
+2025-09-18 17:02:00,829 - INFO - Inserted 1031 records into audit_findings
+2025-09-18 17:02:00,849 - INFO - Created index: idx_audit_findings_audit_number
+2025-09-18 17:02:00,907 - INFO - Created index: idx_audit_findings_audit_status
+2025-09-18 17:02:00,919 - INFO - Created index: idx_audit_findings_start_date
+2025-09-18 17:02:00,926 - INFO - Sheet 'Audit Findings' -> Table 'audit_findings': {'records_processed': 1031, 'records_inserted': 1031, 'status': 'success'}
+2025-09-18 17:02:00,926 - INFO - Processing sheet 'Inspection' -> table 'inspection'
+2025-09-18 17:02:00,938 - WARNING - Could not parse date column start_date: Must specify a fill 'value' or 'method'.
+2025-09-18 17:02:00,943 - WARNING - Could not parse date column entered_scheduled: Must specify a fill 'value' or 'method'.
+2025-09-18 17:02:00,959 - WARNING - Could not parse date column entered_in_progress: Can only use .dt accessor with datetimelike values
+2025-09-18 17:02:00,976 - WARNING - Could not parse date column entered_review: Can only use .dt accessor with datetimelike values
+2025-09-18 17:02:00,979 - WARNING - Could not parse date column entered_pending_action_plan: Must specify a fill 'value' or 'method'.
+2025-09-18 17:02:00,983 - WARNING - Could not parse date column entered_review_action_plan: Must specify a fill 'value' or 'method'.
+2025-09-18 17:02:00,984 - WARNING - Could not parse date column entered_pending_closure: Must specify a fill 'value' or 'method'.
+2025-09-18 17:02:00,993 - WARNING - Could not parse date column entered_closed: Must specify a fill 'value' or 'method'.
+2025-09-18 17:02:01,028 - WARNING - Could not parse date column action_item_due_date: Can only use .dt accessor with datetimelike values
+2025-09-18 17:02:01,033 - WARNING - Could not parse date column action_item_verification_due_date: Must specify a fill 'value' or 'method'.
+2025-09-18 17:02:01,036 - INFO - Cleaned numeric column: audit_number
+2025-09-18 17:02:01,037 - INFO - Cleaned numeric column: audit_rating
+2025-09-18 17:02:01,038 - INFO - Cleaned numeric column: action_item_number
+2025-09-18 17:02:01,846 - INFO - Inserted 1773 records into inspection
+2025-09-18 17:02:01,867 - INFO - Created index: idx_inspection_audit_number
+2025-09-18 17:02:01,881 - INFO - Created index: idx_inspection_audit_status
+2025-09-18 17:02:01,895 - INFO - Created index: idx_inspection_start_date
+2025-09-18 17:02:01,900 - INFO - Sheet 'Inspection' -> Table 'inspection': {'records_processed': 1773, 'records_inserted': 1773, 'status': 'success'}
+2025-09-18 17:02:01,900 - INFO - Processing sheet 'Inspection Findings' -> table 'inspection_findings'
+2025-09-18 17:02:01,911 - WARNING - Could not parse date column start_date: Must specify a fill 'value' or 'method'.
+2025-09-18 17:02:01,915 - WARNING - Could not parse date column entered_scheduled: Must specify a fill 'value' or 'method'.
+2025-09-18 17:02:01,927 - WARNING - Could not parse date column entered_in_progress: Can only use .dt accessor with datetimelike values
+2025-09-18 17:02:01,936 - WARNING - Could not parse date column entered_review: Can only use .dt accessor with datetimelike values
+2025-09-18 17:02:01,938 - WARNING - Could not parse date column entered_pending_action_plan: Must specify a fill 'value' or 'method'.
+2025-09-18 17:02:01,941 - WARNING - Could not parse date column entered_review_action_plan: Must specify a fill 'value' or 'method'.
+2025-09-18 17:02:01,943 - WARNING - Could not parse date column entered_pending_closure: Must specify a fill 'value' or 'method'.
+2025-09-18 17:02:01,950 - WARNING - Could not parse date column entered_closed: Must specify a fill 'value' or 'method'.
+2025-09-18 17:02:01,959 - WARNING - Could not parse date column action_item_due_date: Can only use .dt accessor with datetimelike values
+2025-09-18 17:02:01,961 - WARNING - Could not parse date column action_item_verification_due_date: Must specify a fill 'value' or 'method'.
+2025-09-18 17:02:01,964 - INFO - Cleaned numeric column: audit_number
+2025-09-18 17:02:01,964 - INFO - Cleaned numeric column: audit_rating
+2025-09-18 17:02:01,965 - INFO - Cleaned numeric column: action_item_number
+2025-09-18 17:02:03,293 - INFO - Inserted 3063 records into inspection_findings
+2025-09-18 17:02:03,326 - INFO - Created index: idx_inspection_findings_audit_number
+2025-09-18 17:02:03,364 - INFO - Created index: idx_inspection_findings_audit_status
+2025-09-18 17:02:03,401 - INFO - Created index: idx_inspection_findings_start_date
+2025-09-18 17:02:03,411 - INFO - Sheet 'Inspection Findings' -> Table 'inspection_findings': {'records_processed': 3063, 'records_inserted': 3063, 'status': 'success'}
+2025-09-18 17:02:03,411 - INFO - Creating summary tables...
+2025-09-18 17:02:03,464 - INFO - Summary tables created successfully
+2025-09-18 17:02:03,466 - INFO - Ingestion completed successfully!
+2025-09-18 17:02:03,467 - INFO - Total records inserted: 11196
+2025-09-18 17:02:03,467 - INFO - Database created: epcl_vehs.db

@@ -1,0 +1,577 @@
+Excel File Analysis Report
+==================================================
+
+Sheet: Incident
+Number of columns: 169
+Columns:
+   1. Incident Number
+   2. Date of Occurrence
+   3. Incident Type(s)
+   4. Section
+   5. Title
+   6. Status
+   7. Category
+   8. Description
+   9. Group Company
+  10. Location
+  11. Sub-Location
+  12. Department
+  13. Sub-department
+  14. Location (EPCL)
+  15. Injury Potential
+  16. Location Tag
+  17. Specific Location of Occurrence
+  18. Repeated Incident
+  19. D-Level Committee Number (EPCL)
+  20. Incident Time
+  21. Repeated Event
+  22. Person Involved
+  23. Relationship of Person Involved
+  24. Contracting Company
+  25. Supervisor of Person Involved
+  26. Date Shift Began
+  27. Time Shift Began
+  28. Reported By
+  29. Date Reported
+  30. Date Entered
+  31. Responsible For HSE Quality Check
+  32. Responsible for Investigation
+  33. Task or Activity at Time of Incident
+  34. Object/Substance That Directly Injured or Made Person Ill
+  35. Physical or Immediate Causes of Incident
+  36. First Aid Responder
+  37. Description of Treatment Provided
+  38. Reportable/Recordable?
+  39. Regulatory Authority
+  40. Agency Contact Information
+  41. Date Reported (to agency)
+  42. External Report Number
+  43. Injury Classification
+  44. # Restricted Days
+  45. # Lost Days
+  46. Name of Physician or Health Care Professional
+  47. Healthcare Facility Name and Address
+  48. Name of Physician or Health Care Professional.1
+  49. Healthcare Facility Name and Address.1
+  50. Details of Treatment
+  51. Point of Release Size
+  52. Material Class
+  53. Mode of Operation
+  54. Release Source
+  55. Investigation Team Leader
+  56. Target Completion Date
+  57. Health Professional: I concur with the Injury/Illness Classification
+  58. Sequence of Events
+  59. Quantity Contaminated
+  60. Why #1
+  61. Answer #1
+  62. Why #2
+  63. Answer #2
+  64. Why #3
+  65. Answer #3
+  66. Why #4
+  67. Answer #4
+  68. Why #5
+  69. Answer #5
+  70. Management System Non-Compliance
+  71. PSM
+  72. EMS
+  73. OHIH
+  74. Conclusion
+  75. Completion Date
+  76. Injury/Illness Type
+  77. Body Part
+  78. Accident Type
+  79. Accident Agent
+  80. Date of Birth
+  81. Job Title
+  82. Hire Date
+  83. Years in Present Job
+  84. Total Years Experience
+  85. PPE Worn
+  86. Chemical(s) Released
+  87. CAS Number
+  88. Chemical(s) Class
+  89. Release Source.1
+  90. Released To
+  91. Quantity Released
+  92. Quantity Recovered
+  93. Onsite Area Affected
+  94. Offsite Area Affected
+  95. Time To Contain
+  96. Fire Type
+  97. Ignition Source
+  98. Extinguish Method
+  99. Operational Upset Category
+  100. Motor Vehicle Accident
+  101. Transportation Mode
+  102. Vehicle Type
+  103. Vehicle Ownership
+  104. (Type of) Equipment Failure
+  105. Equipment
+  106. Is the equipment safety critical?
+  107. Equipment ID
+  108. Product Contaminated
+  109. Contaminant
+  110. Equipment ID.1
+  111. Exposure type
+  112. Asset Damage Type
+  113. PSE Category
+  114. Tier 3 Description
+  115. Material involved
+  116. Description.1
+  117. HSE Site Rules Category
+  118. Cardinal Rule Violation
+  119. Emergency Role Statement Violation
+  120. Policy Violation
+  121. PPEs Violation
+  122. Safe Work Practices Violation
+  123. Management System Violation
+  124. Housing/Colony Related Violations
+  125. Other Violations
+  126. Security Concern
+  127. Insurance Group Notified
+  128. Community Concern
+  129. Relevant Consequence (Incident)
+  130. Worst Case Consequence (Incident)
+  131. Actual Consequence (Incident)
+  132. Relevant Consequence (Hazard ID)
+  133. Worst Case Consequence Potential (Hazard ID)
+  134. Violation Type (Hazard ID)
+  135. Root Cause
+  136. Cost Type
+  137. Total Cost
+  138. Responsible for Approval (Hazard ID)
+  139. Responsible For Investigation Approval
+  140. Investigation Type
+  141. PSE Category Selection Criteria
+  142. Actual Leakage Quantity
+  143. Corrective Actions
+  144. Entered Investigation
+  145. Entered Review
+  146. Entered Pending Closure
+  147. Entered Closed
+  148. Task or Activity at Time of Incident.1
+  149. Regulatory Non-Compliance
+  150. Surface Condition
+  151. Driving Conditions
+  152. Driver's Name + License Information
+  153. Behavioral Violation at the Time of Incident
+  154. Driver Speed
+  155. Issues with Vehicle at the Time of Incident
+  156. Violation Type (Incident)
+  157. Loss of Containment
+  158. Vehicle Fitness Certificate Available?
+  159. Inhalation
+  160. Ingestion
+  161. Noise
+  162. Heat Stress
+  163. Sharps
+  164. Ergonomics
+  165. Lighting
+  166. Radiation
+  167. OHIH Advisor Remarks
+  168. Key Factor
+  169. Contributing Factor
+
+----------------------------------------
+
+Sheet: Hazard ID
+Number of columns: 169
+Columns:
+   1. Incident Number
+   2. Date of Occurrence
+   3. Incident Type(s)
+   4. Section
+   5. Title
+   6. Status
+   7. Category
+   8. Description
+   9. Group Company
+  10. Location
+  11. Sub-Location
+  12. Department
+  13. Sub-department
+  14. Location (EPCL)
+  15. Injury Potential
+  16. Location Tag
+  17. Specific Location of Occurrence
+  18. Repeated Incident
+  19. D-Level Committee Number (EPCL)
+  20. Incident Time
+  21. Repeated Event
+  22. Person Involved
+  23. Relationship of Person Involved
+  24. Contracting Company
+  25. Supervisor of Person Involved
+  26. Date Shift Began
+  27. Time Shift Began
+  28. Reported By
+  29. Date Reported
+  30. Date Entered
+  31. Responsible For HSE Quality Check
+  32. Responsible for Investigation
+  33. Task or Activity at Time of Incident
+  34. Object/Substance That Directly Injured or Made Person Ill
+  35. Physical or Immediate Causes of Incident
+  36. First Aid Responder
+  37. Description of Treatment Provided
+  38. Reportable/Recordable?
+  39. Regulatory Authority
+  40. Agency Contact Information
+  41. Date Reported (to agency)
+  42. External Report Number
+  43. Injury Classification
+  44. # Restricted Days
+  45. # Lost Days
+  46. Name of Physician or Health Care Professional
+  47. Healthcare Facility Name and Address
+  48. Name of Physician or Health Care Professional.1
+  49. Healthcare Facility Name and Address.1
+  50. Details of Treatment
+  51. Point of Release Size
+  52. Material Class
+  53. Mode of Operation
+  54. Release Source
+  55. Investigation Team Leader
+  56. Target Completion Date
+  57. Health Professional: I concur with the Injury/Illness Classification
+  58. Sequence of Events
+  59. Quantity Contaminated
+  60. Why #1
+  61. Answer #1
+  62. Why #2
+  63. Answer #2
+  64. Why #3
+  65. Answer #3
+  66. Why #4
+  67. Answer #4
+  68. Why #5
+  69. Answer #5
+  70. Management System Non-Compliance
+  71. PSM
+  72. EMS
+  73. OHIH
+  74. Conclusion
+  75. Completion Date
+  76. Injury/Illness Type
+  77. Body Part
+  78. Accident Type
+  79. Accident Agent
+  80. Date of Birth
+  81. Job Title
+  82. Hire Date
+  83. Years in Present Job
+  84. Total Years Experience
+  85. PPE Worn
+  86. Chemical(s) Released
+  87. CAS Number
+  88. Chemical(s) Class
+  89. Release Source.1
+  90. Released To
+  91. Quantity Released
+  92. Quantity Recovered
+  93. Onsite Area Affected
+  94. Offsite Area Affected
+  95. Time To Contain
+  96. Fire Type
+  97. Ignition Source
+  98. Extinguish Method
+  99. Operational Upset Category
+  100. Motor Vehicle Accident
+  101. Transportation Mode
+  102. Vehicle Type
+  103. Vehicle Ownership
+  104. (Type of) Equipment Failure
+  105. Equipment
+  106. Is the equipment safety critical?
+  107. Equipment ID
+  108. Product Contaminated
+  109. Contaminant
+  110. Equipment ID.1
+  111. Exposure type
+  112. Asset Damage Type
+  113. PSE Category
+  114. Tier 3 Description
+  115. Material involved
+  116. Description.1
+  117. HSE Site Rules Category
+  118. Cardinal Rule Violation
+  119. Emergency Role Statement Violation
+  120. Policy Violation
+  121. PPEs Violation
+  122. Safe Work Practices Violation
+  123. Management System Violation
+  124. Housing/Colony Related Violations
+  125. Other Violations
+  126. Security Concern
+  127. Insurance Group Notified
+  128. Community Concern
+  129. Relevant Consequence (Incident)
+  130. Worst Case Consequence (Incident)
+  131. Actual Consequence (Incident)
+  132. Relevant Consequence (Hazard ID)
+  133. Worst Case Consequence Potential (Hazard ID)
+  134. Violation Type (Hazard ID)
+  135. Root Cause
+  136. Cost Type
+  137. Total Cost
+  138. Responsible for Approval (Hazard ID)
+  139. Responsible For Investigation Approval
+  140. Investigation Type
+  141. PSE Category Selection Criteria
+  142. Actual Leakage Quantity
+  143. Corrective Actions
+  144. Entered Investigation
+  145. Entered Review
+  146. Entered Pending Closure
+  147. Entered Closed
+  148. Task or Activity at Time of Incident.1
+  149. Regulatory Non-Compliance
+  150. Surface Condition
+  151. Driving Conditions
+  152. Driver's Name + License Information
+  153. Behavioral Violation at the Time of Incident
+  154. Driver Speed
+  155. Issues with Vehicle at the Time of Incident
+  156. Violation Type (Incident)
+  157. Loss of Containment
+  158. Vehicle Fitness Certificate Available?
+  159. Inhalation
+  160. Ingestion
+  161. Noise
+  162. Heat Stress
+  163. Sharps
+  164. Ergonomics
+  165. Lighting
+  166. Radiation
+  167. OHIH Advisor Remarks
+  168. Key Factor
+  169. Contributing Factor
+
+----------------------------------------
+
+Sheet: Audit
+Number of columns: 50
+Columns:
+   1. Audit Number
+   2. Audit Location
+   3. Audit Title
+   4. Auditor
+   5. Start Date
+   6. Audit Status
+   7. Location Tag
+   8. Audit Category
+   9. Auditing Body
+  10. Audit Rating
+  11. Group Company
+  12. Location (EPCL)
+  13. Audit Type (EPCL)
+  14. Template
+  15. Template Version
+  16. Created By
+  17. Audit Team
+  18. Supervisor
+  19. Responsible for Action Plan
+  20. Responsible for Action Plan Review
+  21. Entered Scheduled
+  22. Entered In Progress
+  23. Entered Review
+  24. Entered Pending Action Plan
+  25. Entered Review Action Plan
+  26. Entered Pending Closure
+  27. Entered Closed
+  28. Checklist Category
+  29. Question
+  30. Regulatory Reference
+  31. Help Text
+  32. Answer
+  33. Recommendation
+  34. Response
+  35. Finding
+  36. Finding Location
+  37. Worst Case Consequence
+  38. Action Item Number
+  39. Action Item Title
+  40. Action Item Description
+  41. Action Item Responsible
+  42. Action Item Delegated
+  43. Action Item Responsible for Verification
+  44. Action Item Effective?
+  45. Action Item Verification Details
+  46. Action Item Priority
+  47. Action Item Due Date
+  48. Action Item Verification Due Date
+  49. Action Item Status
+  50. Action Item Progress Notes
+
+----------------------------------------
+
+Sheet: Audit Findings
+Number of columns: 50
+Columns:
+   1. Audit Number
+   2. Audit Location
+   3. Audit Title
+   4. Auditor
+   5. Start Date
+   6. Audit Status
+   7. Location Tag
+   8. Audit Category
+   9. Auditing Body
+  10. Audit Rating
+  11. Group Company
+  12. Location (EPCL)
+  13. Audit Type (EPCL)
+  14. Template
+  15. Template Version
+  16. Created By
+  17. Audit Team
+  18. Supervisor
+  19. Responsible for Action Plan
+  20. Responsible for Action Plan Review
+  21. Entered Scheduled
+  22. Entered In Progress
+  23. Entered Review
+  24. Entered Pending Action Plan
+  25. Entered Review Action Plan
+  26. Entered Pending Closure
+  27. Entered Closed
+  28. Checklist Category
+  29. Question
+  30. Regulatory Reference
+  31. Help Text
+  32. Answer
+  33. Recommendation
+  34. Response
+  35. Finding
+  36. Finding Location
+  37. Worst Case Consequence
+  38. Action Item Number
+  39. Action Item Title
+  40. Action Item Description
+  41. Action Item Responsible
+  42. Action Item Delegated
+  43. Action Item Responsible for Verification
+  44. Action Item Effective?
+  45. Action Item Verification Details
+  46. Action Item Priority
+  47. Action Item Due Date
+  48. Action Item Verification Due Date
+  49. Action Item Status
+  50. Action Item Progress Notes
+
+----------------------------------------
+
+Sheet: Inspection
+Number of columns: 50
+Columns:
+   1. Audit Number
+   2. Audit Location
+   3. Audit Title
+   4. Auditor
+   5. Start Date
+   6. Audit Status
+   7. Location Tag
+   8. Audit Category
+   9. Auditing Body
+  10. Audit Rating
+  11. Group Company
+  12. Location (EPCL)
+  13. Audit Type (EPCL)
+  14. Template
+  15. Template Version
+  16. Created By
+  17. Audit Team
+  18. Supervisor
+  19. Responsible for Action Plan
+  20. Responsible for Action Plan Review
+  21. Entered Scheduled
+  22. Entered In Progress
+  23. Entered Review
+  24. Entered Pending Action Plan
+  25. Entered Review Action Plan
+  26. Entered Pending Closure
+  27. Entered Closed
+  28. Checklist Category
+  29. Question
+  30. Regulatory Reference
+  31. Help Text
+  32. Answer
+  33. Recommendation
+  34. Response
+  35. Finding
+  36. Finding Location
+  37. Worst Case Consequence
+  38. Action Item Number
+  39. Action Item Title
+  40. Action Item Description
+  41. Action Item Responsible
+  42. Action Item Delegated
+  43. Action Item Responsible for Verification
+  44. Action Item Effective?
+  45. Action Item Verification Details
+  46. Action Item Priority
+  47. Action Item Due Date
+  48. Action Item Verification Due Date
+  49. Action Item Status
+  50. Action Item Progress Notes
+
+----------------------------------------
+
+Sheet: Inspection Findings
+Number of columns: 50
+Columns:
+   1. Audit Number
+   2. Audit Location
+   3. Audit Title
+   4. Auditor
+   5. Start Date
+   6. Audit Status
+   7. Location Tag
+   8. Audit Category
+   9. Auditing Body
+  10. Audit Rating
+  11. Group Company
+  12. Location (EPCL)
+  13. Audit Type (EPCL)
+  14. Template
+  15. Template Version
+  16. Created By
+  17. Audit Team
+  18. Supervisor
+  19. Responsible for Action Plan
+  20. Responsible for Action Plan Review
+  21. Entered Scheduled
+  22. Entered In Progress
+  23. Entered Review
+  24. Entered Pending Action Plan
+  25. Entered Review Action Plan
+  26. Entered Pending Closure
+  27. Entered Closed
+  28. Checklist Category
+  29. Question
+  30. Regulatory Reference
+  31. Help Text
+  32. Answer
+  33. Recommendation
+  34. Response
+  35. Finding
+  36. Finding Location
+  37. Worst Case Consequence
+  38. Action Item Number
+  39. Action Item Title
+  40. Action Item Description
+  41. Action Item Responsible
+  42. Action Item Delegated
+  43. Action Item Responsible for Verification
+  44. Action Item Effective?
+  45. Action Item Verification Details
+  46. Action Item Priority
+  47. Action Item Due Date
+  48. Action Item Verification Due Date
+  49. Action Item Status
+  50. Action Item Progress Notes
+
+----------------------------------------
+
