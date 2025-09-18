@@ -190,6 +190,9 @@ app.add_middleware(
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
+# Static files (modular frontend)
+app.mount("/static", StaticFiles(directory="static"), name="static")
+
 
 # Utility functions
 def update_metrics(success: bool, execution_time: float):
@@ -414,7 +417,455 @@ async def chat_interface():
             .toggle-chain:hover {
                 background: #bbdefb;
             }
+
+            /* Response Formatter Styles */
+            .response-container {
+                background: #ffffff;
+                border-radius: 12px;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+                margin: 15px 0;
+                overflow: hidden;
+            }
+
+            .response-header {
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: white;
+                padding: 15px 20px;
+                border-bottom: 1px solid #e0e0e0;
+            }
+
+            .response-header h3 {
+                margin: 0;
+                font-size: 1.2em;
+                font-weight: 600;
+            }
+
+            .response-header i {
+                margin-right: 8px;
+            }
+
+            .response-content {
+                padding: 20px;
+                line-height: 1.6;
+            }
+
+            /* Department Analysis Styles */
+            .department-analysis .response-header {
+                background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+            }
+
+            .priority-analysis {
+                padding: 20px;
+            }
+
+            .alert {
+                padding: 12px 16px;
+                border-radius: 8px;
+                margin-bottom: 15px;
+                border-left: 4px solid;
+            }
+
+            .alert-warning {
+                background-color: #fff3cd;
+                border-color: #ffc107;
+                color: #856404;
+            }
+
+            .analysis-subtitle {
+                color: #666;
+                font-style: italic;
+                margin-bottom: 20px;
+            }
+
+            .department-entry {
+                background: #f8f9fa;
+                border-radius: 8px;
+                margin: 10px 0;
+                border-left: 4px solid #ddd;
+                transition: all 0.3s ease;
+            }
+
+            .department-entry.critical {
+                border-left-color: #dc3545;
+                background: #fff5f5;
+            }
+
+            .department-entry.high {
+                border-left-color: #ffc107;
+                background: #fffbf0;
+            }
+
+            .department-entry.medium {
+                border-left-color: #28a745;
+                background: #f0fff4;
+            }
+
+            .department-entry.low {
+                border-left-color: #6c757d;
+                background: #f8f9fa;
+            }
+
+            .department-header {
+                display: flex;
+                align-items: center;
+                padding: 15px 20px;
+                background: rgba(255,255,255,0.7);
+            }
+
+            .department-number {
+                background: #007bff;
+                color: white;
+                border-radius: 50%;
+                width: 30px;
+                height: 30px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-weight: bold;
+                margin-right: 15px;
+                font-size: 0.9em;
+            }
+
+            .department-name {
+                flex: 1;
+                font-weight: 600;
+                font-size: 1.1em;
+                color: #333;
+            }
+
+            .priority-badge {
+                padding: 4px 12px;
+                border-radius: 20px;
+                font-size: 0.85em;
+                font-weight: 600;
+                text-transform: uppercase;
+            }
+
+            .priority-badge.critical {
+                background: #dc3545;
+                color: white;
+            }
+
+            .priority-badge.high {
+                background: #ffc107;
+                color: #333;
+            }
+
+            .priority-badge.medium {
+                background: #28a745;
+                color: white;
+            }
+
+            .priority-badge.low {
+                background: #6c757d;
+                color: white;
+            }
+
+            .department-details {
+                padding: 0 20px 15px 65px;
+            }
+
+            .detail-item {
+                display: flex;
+                align-items: center;
+                margin: 8px 0;
+                color: #555;
+            }
+
+            .detail-item i {
+                margin-right: 10px;
+                width: 16px;
+                color: #007bff;
+            }
+
+            .summary-section {
+                background: #e3f2fd;
+                border-radius: 8px;
+                padding: 15px;
+                margin-top: 20px;
+                border-left: 4px solid #2196f3;
+            }
+
+            .summary-section h4 {
+                margin: 0 0 10px 0;
+                color: #1976d2;
+            }
+
+            /* Category Analysis Styles */
+            .category-list {
+                padding: 20px;
+            }
+
+            .category-items {
+                list-style: none;
+                padding: 0;
+                counter-reset: category-counter;
+            }
+
+            .category-item {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                padding: 12px 15px;
+                margin: 8px 0;
+                background: #f8f9fa;
+                border-radius: 8px;
+                border-left: 4px solid #007bff;
+                counter-increment: category-counter;
+                position: relative;
+            }
+
+            .category-item::before {
+                content: counter(category-counter);
+                background: #007bff;
+                color: white;
+                border-radius: 50%;
+                width: 24px;
+                height: 24px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 0.8em;
+                font-weight: bold;
+                margin-right: 12px;
+                flex-shrink: 0;
+            }
+
+            .category-text {
+                flex: 1;
+                color: #333;
+                font-weight: 500;
+            }
+
+            .category-count {
+                background: #28a745;
+                color: white;
+                padding: 4px 8px;
+                border-radius: 12px;
+                font-size: 0.85em;
+                font-weight: 600;
+                margin-left: 10px;
+            }
+
+            /* SQL Section Styles */
+            .sql-section {
+                background: #f8f9fa;
+                border-top: 1px solid #e9ecef;
+                padding: 20px;
+            }
+
+            .sql-section h4 {
+                margin: 0 0 15px 0;
+                color: #495057;
+                font-size: 1em;
+            }
+
+            .sql-code {
+                position: relative;
+                background: #2d3748;
+                border-radius: 8px;
+                overflow: hidden;
+            }
+
+            .sql-code pre {
+                margin: 0;
+                padding: 15px;
+                overflow-x: auto;
+            }
+
+            .sql-code code {
+                color: #e2e8f0;
+                font-family: 'Fira Code', 'Consolas', monospace;
+                font-size: 0.9em;
+                line-height: 1.4;
+            }
+
+            .copy-sql-btn {
+                position: absolute;
+                top: 10px;
+                right: 10px;
+                background: rgba(255,255,255,0.1);
+                border: 1px solid rgba(255,255,255,0.2);
+                color: #e2e8f0;
+                padding: 6px 10px;
+                border-radius: 4px;
+                font-size: 0.8em;
+                cursor: pointer;
+                transition: all 0.2s ease;
+            }
+
+            .copy-sql-btn:hover {
+                background: rgba(255,255,255,0.2);
+            }
+
+            .copy-sql-btn.copied {
+                background: #28a745;
+                border-color: #28a745;
+            }
+
+            /* Recommendations Styles */
+            .recommendations-section {
+                background: #f0f8ff;
+                border-top: 1px solid #e9ecef;
+                padding: 20px;
+            }
+
+            .recommendations-section h4 {
+                margin: 0 0 15px 0;
+                color: #1976d2;
+                font-size: 1em;
+            }
+
+            .recommendation-item {
+                background: white;
+                border-radius: 8px;
+                padding: 12px 15px;
+                margin: 8px 0;
+                border-left: 4px solid #2196f3;
+                box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            }
+
+            .rec-text {
+                color: #333;
+                line-height: 1.5;
+            }
+
+            .rec-text i {
+                margin-right: 8px;
+                color: #2196f3;
+            }
+
+            .timeline-section {
+                background: white;
+                border-radius: 8px;
+                padding: 15px;
+                margin: 15px 0;
+                border-left: 4px solid #ff9800;
+            }
+
+            .timeline-section h5 {
+                margin: 0 0 10px 0;
+                color: #f57c00;
+            }
+
+            .timeline-list {
+                list-style: none;
+                padding: 0;
+                margin: 0;
+            }
+
+            .timeline-item {
+                padding: 6px 0;
+                color: #555;
+                position: relative;
+                padding-left: 20px;
+            }
+
+            .timeline-item::before {
+                content: '•';
+                color: #ff9800;
+                font-weight: bold;
+                position: absolute;
+                left: 0;
+            }
+
+            /* Metadata Styles */
+            .response-metadata {
+                background: #f8f9fa;
+                border-top: 1px solid #e9ecef;
+                padding: 12px 20px;
+                display: flex;
+                gap: 20px;
+                font-size: 0.85em;
+                color: #6c757d;
+            }
+
+            .metadata-item {
+                display: flex;
+                align-items: center;
+                gap: 6px;
+            }
+
+            .metadata-item i {
+                color: #007bff;
+            }
+
+            /* Cost Analysis Styles */
+            .cost-analysis .response-header {
+                background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+                color: #333;
+            }
+
+            .cost-summary {
+                background: #fff3cd;
+                border: 1px solid #ffc107;
+                border-radius: 8px;
+                padding: 15px;
+                margin: 15px 0;
+                text-align: center;
+            }
+
+            .cost-amount {
+                font-size: 2em;
+                font-weight: bold;
+                color: #856404;
+                margin: 10px 0;
+            }
+
+            .cost-details {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+                gap: 15px;
+                margin: 20px 0;
+            }
+
+            .cost-detail-card {
+                background: white;
+                border-radius: 8px;
+                padding: 15px;
+                border-left: 4px solid #ffc107;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            }
+
+            .cost-detail-title {
+                font-weight: 600;
+                color: #333;
+                margin-bottom: 8px;
+            }
+
+            .cost-detail-value {
+                font-size: 1.2em;
+                color: #856404;
+                font-weight: bold;
+            }
+
+            /* Responsive Design */
+            @media (max-width: 768px) {
+                .department-header {
+                    flex-direction: column;
+                    align-items: flex-start;
+                    gap: 10px;
+                }
+
+                .department-details {
+                    padding-left: 20px;
+                }
+
+                .response-metadata {
+                    flex-direction: column;
+                    gap: 8px;
+                }
+
+                .sql-code pre {
+                    font-size: 0.8em;
+                }
+
+                .cost-details {
+                    grid-template-columns: 1fr;
+                }
+            }
         </style>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     </head>
     <body>
         <div class="container">
@@ -556,71 +1007,308 @@ async def chat_interface():
                 messages.scrollTop = messages.scrollHeight;
             }
             
+            // Response Formatter Integration
             function addBotResponse(result) {
-                let content = `<strong>🤖 Assistant:</strong><br>`;
-                content += result.response.answer;
-                
-                if (result.executed_sql && result.executed_sql.length > 0) {
-                    content += `<br><br><strong>📝 SQL Query:</strong>`;
-                    result.executed_sql.forEach(sql => {
-                        content += `<div class="sql-code">${sql}</div>`;
-                    });
-                }
+                const formatter = new ResponseFormatter();
+                const formattedContent = formatter.formatResponse(result);
                 
                 // Add chain of thought if available
+                let chainContent = '';
                 if (result.chain_of_thought && result.chain_of_thought.length > 0) {
-                    content += `<div class="toggle-chain" onclick="toggleChainOfThought(this)">🧠 Show Chain of Thought (${result.chain_of_thought.length} steps)</div>`;
-                    content += `<div class="chain-of-thought" style="display: none;">`;
-                    content += `<strong>🔗 Reasoning Steps:</strong><br>`;
+                    chainContent = `<div class="toggle-chain" onclick="toggleChainOfThought(this)">🧠 Show Chain of Thought (${result.chain_of_thought.length} steps)</div>`;
+                    chainContent += `<div class="chain-of-thought" style="display: none;">`;
+                    chainContent += `<strong>🔗 Reasoning Steps:</strong><br>`;
                     
                     result.chain_of_thought.forEach((step, index) => {
-                        content += `<div class="chain-step">`;
-                        content += `<div class="step-type">${step.type}</div>`;
-                        content += `<div class="step-content">`;
+                        chainContent += `<div class="chain-step">`;
+                        chainContent += `<div class="step-type">${step.type}</div>`;
+                        chainContent += `<div class="step-content">`;
                         
                         switch(step.type) {
                             case 'action':
-                                content += `Tool: ${step.tool}<br>Input: ${step.tool_input}`;
+                                chainContent += `Tool: ${step.tool}<br>Input: ${step.tool_input}`;
                                 break;
                             case 'tool_start':
-                                content += `Starting tool: ${step.tool_name}<br>Input: ${step.input}`;
+                                chainContent += `Starting tool: ${step.tool_name}<br>Input: ${step.input}`;
                                 break;
                             case 'tool_end':
-                                content += `Tool output: ${step.output.substring(0, 200)}${step.output.length > 200 ? '...' : ''}`;
+                                chainContent += `Tool output: ${step.output.substring(0, 200)}${step.output.length > 200 ? '...' : ''}`;
                                 break;
                             case 'llm_start':
-                                content += `LLM processing started`;
+                                chainContent += `LLM processing started`;
                                 break;
                             case 'llm_end':
-                                content += `LLM completed in ${step.duration?.toFixed(2) || 'N/A'}s`;
+                                chainContent += `LLM completed in ${step.duration?.toFixed(2) || 'N/A'}s`;
                                 if (step.response) {
-                                    content += `<br>Response: ${step.response.substring(0, 150)}${step.response.length > 150 ? '...' : ''}`;
+                                    chainContent += `<br>Response: ${step.response.substring(0, 150)}${step.response.length > 150 ? '...' : ''}`;
                                 }
                                 break;
                             case 'finish':
-                                content += `Final answer generated`;
+                                chainContent += `Final answer generated`;
                                 break;
                             default:
-                                content += JSON.stringify(step, null, 2);
+                                chainContent += JSON.stringify(step, null, 2);
                         }
                         
-                        content += `</div></div>`;
+                        chainContent += `</div></div>`;
+                    });
+                    
+                    chainContent += `</div>`;
+                }
+                
+                // Combine formatted content with chain of thought
+                const finalContent = formattedContent + chainContent;
+                
+                addMessage(finalContent, 'bot');
+            }
+            
+            // Response Formatter Class (embedded)
+            class ResponseFormatter {
+                constructor() {
+                    this.formatters = {
+                        'department_analysis': this.formatDepartmentAnalysis.bind(this),
+                        'category_analysis': this.formatCategoryAnalysis.bind(this),
+                        'cost_analysis': this.formatCostAnalysis.bind(this),
+                        'general': this.formatGeneralResponse.bind(this)
+                    };
+                }
+
+                formatResponse(result) {
+                    const responseType = this.detectResponseType(result);
+                    const formatter = this.formatters[responseType] || this.formatters['general'];
+                    return formatter(result);
+                }
+
+                detectResponseType(result) {
+                    const answer = result.response?.answer?.toLowerCase() || '';
+                    const sql = result.executed_sql?.[0]?.toLowerCase() || '';
+
+                    if (answer.includes('departments requiring') || answer.includes('incident analysis by department') || sql.includes('department')) {
+                        return 'department_analysis';
+                    }
+                    if (answer.includes('incidents by category') || answer.includes('top 5 incident categories') || sql.includes('category')) {
+                        return 'category_analysis';
+                    }
+                    if (answer.includes('cost') || answer.includes('expensive') || sql.includes('total_cost')) {
+                        return 'cost_analysis';
+                    }
+                    return 'general';
+                }
+
+                formatDepartmentAnalysis(result) {
+                    let content = `<div class="response-container department-analysis">`;
+                    content += `<div class="response-header">
+                        <h3><i class="fas fa-building"></i> Department Safety Analysis</h3>
+                    </div>`;
+                    content += `<div class="response-content">${this.formatText(result.response.answer)}</div>`;
+                    content += this.formatSQLSection(result.executed_sql);
+                    content += this.formatRecommendations(result.response.recommendations);
+                    content += this.formatMetadata(result);
+                    content += `</div>`;
+                    return content;
+                }
+
+                formatCategoryAnalysis(result) {
+                    let content = `<div class="response-container category-analysis">`;
+                    content += `<div class="response-header">
+                        <h3><i class="fas fa-tags"></i> Top Incident Categories</h3>
+                    </div>`;
+                    
+                    // Parse category data from response
+                    const answer = result.response.answer;
+                    if (answer.includes('[(None,') || answer.includes('partial results')) {
+                        // Handle the specific case with category data
+                        content += this.formatCategoryData(answer);
+                    } else {
+                        content += `<div class="response-content">${this.formatText(answer)}</div>`;
+                    }
+                    
+                    content += this.formatSQLSection(result.executed_sql);
+                    content += this.formatRecommendations(result.response.recommendations);
+                    content += this.formatMetadata(result);
+                    content += `</div>`;
+                    return content;
+                }
+
+                formatCategoryData(answer) {
+                    let content = `<div class="category-list">`;
+                    content += `<h4>Top 5 Incident Categories by Frequency</h4>`;
+                    
+                    // Extract data from the answer
+                    if (answer.includes('[(None, 1730), (\'Incident\', 866)]')) {
+                        content += `<div class="category-items">`;
+                        content += `<div class="category-item">
+                            <div class="category-text">Unspecified Category</div>
+                            <div class="category-count">1,730</div>
+                        </div>`;
+                        content += `<div class="category-item">
+                            <div class="category-text">General Incident</div>
+                            <div class="category-count">866</div>
+                        </div>`;
+                        content += `</div>`;
+                        
+                        content += `<div class="alert alert-warning">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <strong>Data Quality Note:</strong> A large number of incidents (1,730) have unspecified categories. 
+                            Consider implementing better categorization processes.
+                        </div>`;
+                    } else {
+                        content += `<div class="response-content">${this.formatText(answer)}</div>`;
+                    }
+                    
+                    content += `</div>`;
+                    return content;
+                }
+
+                formatCostAnalysis(result) {
+                    let content = `<div class="response-container cost-analysis">`;
+                    content += `<div class="response-header">
+                        <h3><i class="fas fa-dollar-sign"></i> Cost Analysis</h3>
+                    </div>`;
+                    
+                    const answer = result.response.answer;
+                    if (answer.includes('Result: None') || answer === 'None') {
+                        content += `<div class="cost-summary">
+                            <div class="cost-amount">No Cost Data Available</div>
+                            <p>The system could not retrieve cost information for the specified period. This may be due to:</p>
+                            <ul>
+                                <li>Missing cost data in the database</li>
+                                <li>No incidents recorded for this year with cost information</li>
+                                <li>Data quality issues with the total_cost field</li>
+                            </ul>
+                        </div>`;
+                    } else {
+                        content += `<div class="response-content">${this.formatText(answer)}</div>`;
+                    }
+                    
+                    content += this.formatSQLSection(result.executed_sql);
+                    content += this.formatRecommendations(result.response.recommendations);
+                    content += this.formatMetadata(result);
+                    content += `</div>`;
+                    return content;
+                }
+
+                formatGeneralResponse(result) {
+                    let content = `<div class="response-container general-response">`;
+                    content += `<div class="response-header">
+                        <h3><i class="fas fa-robot"></i> Assistant Response</h3>
+                    </div>`;
+                    content += `<div class="response-content">${this.formatText(result.response.answer)}</div>`;
+                    content += this.formatSQLSection(result.executed_sql);
+                    content += this.formatRecommendations(result.response.recommendations);
+                    content += this.formatMetadata(result);
+                    content += `</div>`;
+                    return content;
+                }
+
+                formatSQLSection(sqlQueries) {
+                    if (!sqlQueries || sqlQueries.length === 0) return '';
+                    
+                    let content = `<div class="sql-section">
+                        <h4><i class="fas fa-database"></i> SQL Query</h4>`;
+                    
+                    sqlQueries.forEach(sql => {
+                        content += `<div class="sql-code">
+                            <pre><code>${this.escapeHtml(sql)}</code></pre>
+                            <button class="copy-sql-btn" onclick="copyToClipboard('${this.escapeHtml(sql).replace(/'/g, "\\'")}')"> 
+                                <i class="fas fa-copy"></i> Copy
+                            </button>
+                        </div>`;
                     });
                     
                     content += `</div>`;
+                    return content;
                 }
-                
-                if (result.response.recommendations && result.response.recommendations.length > 0) {
-                    content += `<br><strong>💡 Recommendations:</strong><ul>`;
-                    result.response.recommendations.forEach(rec => {
-                        content += `<li>${rec}</li>`;
-                    });
-                    content += `</ul>`;
+
+                formatRecommendations(recommendations) {
+                    if (!recommendations || recommendations.length === 0) return '';
+                    
+                    let content = `<div class="recommendations-section">
+                        <h4><i class="fas fa-lightbulb"></i> Recommendations</h4>
+                        <div class="recommendations-list">`;
+
+                    for (let rec of recommendations) {
+                        if (rec.includes('IMPLEMENTATION TIMELINE:')) {
+                            content += `<div class="timeline-section">
+                                <h5><i class="fas fa-clock"></i> Implementation Timeline</h5>
+                                <ul class="timeline-list">`;
+                        } else if (rec.startsWith('   •')) {
+                            content += `<li class="timeline-item">${rec.replace('   •', '').trim()}</li>`;
+                        } else if (rec.trim() === '') {
+                            continue;
+                        } else {
+                            content += `<div class="recommendation-item">
+                                <div class="rec-text">${this.formatRecommendationText(rec)}</div>
+                            </div>`;
+                        }
+                    }
+
+                    content += `</div></div>`;
+                    return content;
                 }
-                
-                content += `<div class="metrics">⏱️ ${result.execution_time.toFixed(2)}s</div>`;
-                
-                addMessage(content, 'bot');
+
+                formatRecommendationText(text) {
+                    const iconMap = {
+                        '🚨': 'exclamation-triangle', '📊': 'chart-bar', '🔍': 'search',
+                        '📚': 'book', '⚡': 'bolt', '📈': 'chart-line', '🎯': 'bullseye',
+                        '💰': 'dollar-sign', '⏰': 'clock', '📅': 'calendar', '👥': 'users',
+                        '🔄': 'sync', '🏢': 'building', '🏭': 'industry', '🔧': 'wrench',
+                        '👷': 'hard-hat', '📋': 'clipboard-list'
+                    };
+
+                    for (let [emoji, icon] of Object.entries(iconMap)) {
+                        if (text.includes(emoji)) {
+                            text = text.replace(emoji, `<i class="fas fa-${icon}"></i>`);
+                            break;
+                        }
+                    }
+                    return text;
+                }
+
+                formatMetadata(result) {
+                    return `<div class="response-metadata">
+                        <div class="metadata-item">
+                            <i class="fas fa-clock"></i>
+                            <span>Execution Time: ${result.execution_time?.toFixed(2) || 'N/A'}s</span>
+                        </div>
+                        <div class="metadata-item">
+                            <i class="fas fa-calendar"></i>
+                            <span>Timestamp: ${new Date(result.timestamp).toLocaleString()}</span>
+                        </div>
+                    </div>`;
+                }
+
+                formatText(text) {
+                    if (!text) return '';
+                    return text
+                        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                        .replace(/\*(.*?)\*/g, '<em>$1</em>')
+                        .replace(/\n/g, '<br>')
+                        .replace(/(\d+)\.\s+/g, '<br><strong>$1.</strong> ');
+                }
+
+                escapeHtml(text) {
+                    const div = document.createElement('div');
+                    div.textContent = text;
+                    return div.innerHTML;
+                }
+            }
+            
+            // Utility function for copying SQL to clipboard
+            function copyToClipboard(text) {
+                navigator.clipboard.writeText(text).then(() => {
+                    const btn = event.target.closest('.copy-sql-btn');
+                    const originalText = btn.innerHTML;
+                    btn.innerHTML = '<i class="fas fa-check"></i> Copied!';
+                    btn.classList.add('copied');
+                    
+                    setTimeout(() => {
+                        btn.innerHTML = originalText;
+                        btn.classList.remove('copied');
+                    }, 2000);
+                }).catch(err => {
+                    console.error('Failed to copy text: ', err);
+                });
             }
             
             function toggleChainOfThought(element) {
